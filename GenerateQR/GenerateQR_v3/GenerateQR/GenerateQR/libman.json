@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "es6-promise@4.2.8",
+      "destination": "wwwroot/js/es6-promise/"
+    },
+    {
+      "library": "jspdf@2.5.1",
+      "destination": "wwwroot/js/jspdf/"
+    },
+    {
+      "library": "html2canvas@1.4.1",
+      "destination": "wwwroot/js/html2canvas/"
+    },
+    {
+      "library": "html2pdf.js@0.10.2",
+      "destination": "wwwroot/js/html2pdf.js/"
+    }
+  ]
+}

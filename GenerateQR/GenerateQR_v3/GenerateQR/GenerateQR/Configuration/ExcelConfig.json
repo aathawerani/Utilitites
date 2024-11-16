@@ -1,0 +1,128 @@
+{
+  "MainExcelColumnsName": {
+    "HealthProvider": {
+      "Name": "HealthProvider",
+      "Type": "string"
+    },
+    "Location": {
+      "Name": "Location",
+      "Type": "string"
+    },
+    "ContactPerson": {
+      "Name": "ContactPerson",
+      "Type": "string"
+    },
+    "ContactNO": {
+      "Name": "ContactNO",
+      "Type": "string"
+    },
+    "EmailAddress": {
+      "Name": "EmailAddress",
+      "Type": "string"
+    },
+    "ContractRefrence": {
+      "Name": "ContractRefrence",
+      "Type": "string"
+    },
+    "VATNO": {
+      "Name": "VATNO",
+      "Type": "string"
+    },
+    "InvoiceNO": {
+      "Name": "InvoiceNO",
+      "Type": "string"
+    },
+    "BillingMonth": {
+      "Name": "BillingMonth",
+      "Type": "DateTime"
+    },
+    "DueDate": {
+      "Name": "DueDate",
+      "Type": "DateTime"
+    },
+    "SadadBILLID": {
+      "Name": "SadadBILLID",
+      "Type": "string"
+    },
+    "CCHINO": {
+      "Name": "CCHINO",
+      "Type": "string"
+    },
+    "DHSCode": {
+      "Name": "DHSCode",
+      "Type": "string"
+    },
+    "InsuranceCO": {
+      "Name": "InsuranceCO",
+      "Type": "string"
+    },
+    "item": {
+      "Name": "item",
+      "Type": "string"
+    },
+    "Description": {
+      "Name": "Description",
+      "Type": "string"
+    },
+    "BatchMonth": {
+      "Name": "BatchMonth",
+      "Type": "string"
+    },
+    "Quantity": {
+      "Name": "Quantity",
+      "Type": "string"
+    },
+    "Rate": {
+      "Name": "Rate",
+      "Type": "string"
+    },
+    "Discount": {
+      "Name": "Discount",
+      "Type": "string"
+    },
+    "Total": {
+      "Name": "Total",
+      "Type": "string"
+    },
+    "TotalExcVAT": {
+      "Name": "TotalExcVAT",
+      "Type": "string"
+    },
+    "VAT": {
+      "Name": "VAT",
+      "Type": "string"
+    },
+    "TotalWithVAT": {
+      "Name": "TotalWithVAT",
+      "Type": "string"
+    },
+    "ContractType": {
+      "Name": "ContractType",
+      "Type": "string"
+    },
+    "ClaimRate": {
+      "Name": "ClaimRate",
+      "Type": "string"
+    },
+    "SegmentPrice": {
+      "Name": "SegmentPrice",
+      "Type": "string"
+    },
+    "InvoiceDate": {
+      "Name": "InvoiceDate",
+      "Type": "DateTime"
+    },
+    "CRMQuantity": {
+      "Name": "CRMQuantity",
+      "Type": "string"
+    },
+    "Invoicable": {
+      "Name": "Invoicable",
+      "Type": "string"
+    },
+    "GroupProvider": {
+      "Name": "GroupProvider",
+      "Type": "string"
+    }
+  }
+}

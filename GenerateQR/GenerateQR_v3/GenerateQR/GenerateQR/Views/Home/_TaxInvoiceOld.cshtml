@@ -1,0 +1,975 @@
+﻿@model GenerateQR.Models.ReportModel ;
+@{
+    var data = Model;
+}
+
+@{
+    Layout = null;
+}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!--<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"/>-->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+</head>
+<body style="font-family: 'Roboto',Poppins, sans-serif !important;">
+    <div style="padding: 0px 10px">
+        <div class="pageOne" style="min-height:1430px;display: flex; flex-direction: column;justify-content: space-between;">
+            <div>
+                <section>
+                    <table width="100%" border="0">
+                        <tr valign="middle">
+                            <td width="300">
+                                <img src="https://dhsplatformblobstorage.blob.core.windows.net/dev/img2.png" width="180" />
+                            </td>
+                            <td align="right" style="text-align: right">
+                                <table width="100%" border="0" align="center" class="TableStyle" cellspacing="0" cellpadding="2">
+                                    <tr height="65">
+                                        <td bgcolor="#696969">
+                                            <h4 align="center" style="margin-bottom:0px"><font size="4" color="#fff"> <b>شركة ديجیتال ھیلثكیر سولیوشنز العربیة المحدودة</b> </font></h4>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <table width="100%" border="0">
+                        <tr valign="middle">
+                            <td width="300">
+                                <span align="left" style="margin-bottom:10px;display:inline-block"><font size="5"> <b> Tax Invoice  </b> </font></span><br />
+                                <span align="left" style="margin-bottom:0px"><font size="5"> <b>     فاتورة ضريبية  </b> </font></span>
+                            </td>
+                            <td align="right" style="text-align: right">
+                                <img src="data:image/png;base64,@data.QrCodeImageBase64" width="150" />
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <br />
+                    <table width="100%" border="0" cellpadding="10" cellspacing="0" class="NoMarginTable" style="margin: 0px; padding: 0px; outline: 0px; ">
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2"> HEALTH PROVIDER </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">   مقدم خدمات صحية </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; ">
+                                    <font size="2"> @data?.HealthProvider  </font>
+                                </span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">   INVOICE DATE </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">   تاريخ الفاتورة     </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; ">
+                                    <font size="2"> @data?.InvoiceDate?.ToString("dd-MM-yyyy")  </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">       LOCATION  </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">  موقعك     </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.Location</font></span><br />
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">   INVOICE NO. </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">   رقم الفاتورة     </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2"> @data.InvoiceNO</font></span>
+                            </td>
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">   CONTACT PERSON         </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">     الشخص الذي يمكن الاتصال به       </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2"> @data?.ContactPerson</font></span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">       BILLING MONTH  </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">  تاريخ اصدار الفاتورة     </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.BillingMonth?.ToString("dd-MM-yyyy")</font></span>
+                            </td>
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">     CONTACT NO.      </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">    رقم الاتصال        </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.ContactNO </font></span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">      DUE DATE         </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">       تاريخ الاستحقاق             </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.DueDate?.ToString("dd-MM-yyyy")</font></span>
+                            </td>
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">    EMAIL ADDRESS       </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">     عنوان البريد الالكتروني       </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.EmailAddress </font></span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">     SADAD BILL ID           </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">          رقم سداد          </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2"> </font></span>
+                            </td>
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">     CONTRACT REFERENCE      </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">      اتفاقية مرجع      </font></span>
+                            </td>
+                            <td width="35%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2"> @data?.ContractRefrence</font></span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">        CCHI NO.        </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">        رقم اعتماد مجلس الضمان الصحي            </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.CCHINO </font></span>
+                            </td>
+
+                        </tr>
+                        <tr valign="top" style="margin: 0px; padding: 0px; outline: 0px;height:45px" height="45">
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">       VAT NO.       </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">       الرقم الضريبي للعميل               </font></span>
+                            </td>
+                            <td style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.VATNO</font></span>
+                            </td>
+                            <td width="20%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; margin:0px 0px 2px !important;padding:0px !important;display:inline-block; "><font size="2">          DHS CODE      </font></span><br />
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; "><font size="2">           كود الشركة         </font></span>
+                            </td>
+                            <td width="25%" style="margin: 0px; padding: 0px; outline: 0px;">
+                                <span style="font-size: 10px; font-weight: 600; margin: 0px !important; padding: 0px !important; display: inline-block; "><font size="2">@data?.DHSCode </font></span>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section style="margin-top:40px">
+                    <table width="100%" border="1" align="center" class="TableStyle" cellspacing="0" cellpadding="2">
+                        <thead>
+                            <tr valign="middle" height="60">
+                                <th width="14%" bgcolor="#C0C0C0" valign="middle" style="  font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>  INSURANCE CO. <br />    شركة التأمين </b></font>
+                                </th>
+                                <th width="6%" bgcolor="#C0C0C0" valign="middle" style="  font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>   ITEM  <br /> بند </b></font>
+                                </th>
+                                <th width="30%" bgcolor="#C0C0C0" valign="middle" style=" font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; white-space: nowrap !important ">
+                                    <font color="#000" size="2"><b>DESCRIPTION <br /> وصف الخدمة </b></font>
+                                </th>
+                                <th width="10%" bgcolor="#C0C0C0" valign="middle" style=" font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>BATCH MONTH <br /> مطالبة شهر </b></font>
+                                </th>
+                                <th width="10%" bgcolor="#C0C0C0" valign="middle" style="  font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>    QUANTITY  <br /> الكمية </b></font>
+                                </th>
+                                <th width="10%" bgcolor="#C0C0C0" valign="middle" style="  font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>    RATE  <br /> السعر </b></font>
+                                </th>
+                                <th width="10%" bgcolor="#C0C0C0" valign="middle" style=" font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>    DISCOUNT  <br /> الخصم </b></font>
+                                </th>
+                                <th width="10%" bgcolor="#C0C0C0" valign="middle" style="  font-size: 10px; text-align: center; vertical-align: middle; background-color: #C0C0C0 !important; color: #000; font-size: 10px; ">
+                                    <font color="#000" size="2"><b>TOTAL <br /> المجموع </b></font>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr valign="middle" height="35">
+                                <td width="12%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">
+                                                    @data?.items[0].InsuranceCO
+                                                </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="8%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">  @data?.items[0].item  </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="30%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[0].Description </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[0].BatchMonth </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[0].Quantity </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Rate = (data?.items[0].Rate != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[0].Rate))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">@Rate  </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Discount = (data?.items[0].Discount != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[0].Discount))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">  @Discount % </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style=" font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Total = (data?.items[0].Total != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[0].Total))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> @Total    </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr valign="middle" height="35">
+                                <td width="12%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">
+                                                    @data?.items[1].InsuranceCO
+                                                </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="8%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">  @data?.items[1].item  </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="30%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[1].Description </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[1].BatchMonth </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[1].Quantity </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Rate1 = (data?.items[1].Rate != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[1].Rate))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">@Rate1  </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Discount1 = (data?.items[1].Discount != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[1].Discount))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">  @Discount1 % </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style=" font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Total1 = (data?.items[1].Total != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[1].Total))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> @Total1    </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr valign="middle" height="35">
+                                <td width="12%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">
+                                                    @data?.items[2].InsuranceCO
+                                                </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="8%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle">
+                                                <font size="2">  @data?.items[2].item  </font>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="30%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[2].Description </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[2].BatchMonth </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            <td align="center" valign="middle"> <font size="2"> @data?.items[2].Quantity </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Rate2 = (data?.items[2].Rate != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[2].Rate))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">@Rate2  </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="text-align:center">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Discount2 = (data?.items[2].Discount != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[2].Discount))) : (0);
+                                            }
+                                            <td align="center" valign="middle"> <font size="2">  @Discount2 % </font> </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td width="10%" style=" font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var Total2 = (data?.items[2].Total != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.items[2].Total))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> @Total2    </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr valign="bottom" height="35">
+                                <td colspan="3" rowspan="3" style="  font-size: 10px; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0">
+                                        <tr height="40" style="height:35px">
+                                            <td align="left"> <font size="2"> Amount in words : </font> </td>
+                                            <td align="right"> <font size="2"> : المبلغ بالتفصيل   </font> </td>
+                                        </tr>
+                                        <tr height="40" style="height:35px">
+                                            <td align="left"> <font size="2"><b> Saudi Riyals *** @data?.TotalInWords </b> </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td colspan="4" style="  font-size: 10px; text-align: right; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align: right">
+                                        <tr height="40" style="height:35px">
+                                            <td align="right" valign="middle"> <font size="2"> TOTAL PRICE EXCL VAT <br />  إجمالي السعر باستثناء ضربية القيمة المضافة </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var TotalExcVAT = (data?.TotalExcVAT != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.TotalExcVAT))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> @TotalExcVAT    </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr valign="middle" height="35">
+                                <td colspan="4" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align: right">
+                                        <tr height="40" style="height:35px">
+                                            <td align="right" valign="middle"> <font size="2"> VAT % = 15% VAT AMOUNT <br />   قيمة الضريبة نسبة ضريبة القيمة المضافة </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var VAT = (data?.VAT != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.VAT))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> @VAT    </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr valign="middle" height="35">
+                                <td colspan="4" style="  font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align: right">
+                                        <tr height="40" style="height:35px">
+                                            <td align="right" valign="middle"> <font size="2"> <b>TOTAL INVOICE AMOUNT   <br />  المبلغ الإجمالي للفاتورة </b>   </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td style="border: 1px solid #000; font-size: 10px; text-align: center; vertical-align: middle; font-weight: 600;">
+                                    <table width="100%" border="0" cellpadding="5" cellspacing="0" style="text-align:right">
+                                        <tr height="40" style="height:35px">
+                                            @{
+                                                var TotalWithVAT = (data?.TotalWithVAT != null) ? (Convert.ToDecimal(string.Format("{0:0.00}", data?.TotalWithVAT))) : (0);
+                                            }
+                                            <td align="right" valign="middle"> <font size="2"> <b> @TotalWithVAT     </b> </font> </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section>
+                    <br />
+                    <div class="PaymentDiv" style="font-size: 10px;  margin-top:20px">
+                        <div style="margin: 2px 0px;">
+                            <label><font size="2"> Beneficiary's name : </font></label>
+                            <span><font size="2"><b>Digital Healthcare Solutions Arabia LLC</b></font></span>
+                        </div>
+                        <div style="margin: 2px 0px;">
+                            <label><font size="2"> Account NO. : </font></label>
+                            <span><font size="2"><b>0108 0572 3427 0014</b></font></span>
+                        </div>
+                        <div style="margin: 2px 0px;">
+                            <label><font size="2"> IBAN Number : </font></label>
+                            <span><font size="2"><b>SA88 3040 0108 0572 3427 0014</b></font></span>
+                        </div>
+                        <div style="margin: 2px 0px;">
+                            <label><font size="2"> Beneficiary's bank : </font></label>
+                            <span><font size="2"><b>Arab National Bank</b></font></span>
+                        </div>
+                        <div style="margin: 2px 0px;">
+                            <label><font size="2"> It is important to send a copy of the wire transfer receipt to </font></label>
+                        </div>
+                        <div style="margin: 2px 0px;">
+                            <label style="color:#0000FF"><font size="2"> invoices&contracts@dhsarabia.com </font></label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div>
+                <section style="margin-top:20px">
+                    <div>
+                        <table width="100%">
+                            <tr>
+                                <td width="300">
+                                    <div class="FooterDiv">
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>P.O.BOX 50009 RIYADH 11523 KSA | TEL +966 920000958</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>FAX +966 114944366 | WWW.DHSARABIA.COM</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>C.R. NO. 1010255175 | VAT NO. 300073375400003</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>PAID CAPITAL 5,000,000 SAR</font></p>
+                                    </div>
+                                </td>
+                                <td align="right" style="text-align: right">
+                                    <img src="https://dhsplatformblobstorage.blob.core.windows.net/dev/Images/quotationImg6.PNG" height="70" width="300" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="pageTwo" style="min-height:1430px;display: flex; flex-direction: column;justify-content: space-between;">
+            <div>
+                <section>
+                    <br />
+                    <table width="100%" border="0">
+                        <tr valign="middle">
+                            <td width="300">
+                                <img src="https://dhsplatformblobstorage.blob.core.windows.net/dev/img2.png" width="180" />
+                            </td>
+                            <td align="right" style="text-align: right">
+                                <table width="100%" border="0" align="center" class="TableStyle" cellspacing="0" cellpadding="2">
+                                    <tr height="65">
+                                        <td bgcolor="#696969">
+                                            <h4 align="center" style="margin-bottom:0px"><font size="4" color="#fff"> <b>شركة ديجیتال ھیلثكیر سولیوشنز العربیة المحدودة</b> </font></h4>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="7">
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>Terms and Conditions:</b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>  : الشروط والأحكام  </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 1) Invoice Amount Due: </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>:  إستحقاق الدفع   </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        You are requested to pay the Invoice Amount as shown on the <br />
+                                        first page in the orange box during the 30 days from the invoice <br />
+                                        date. Non-payment may result in suspending your account.
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        يجب عليك تسديد المبلغ المذكور في الصفحة الأولى بالمربع الأحمر في خلال 30 يوم من  <br />
+                                        تاريخ الفاتورة عدم الإلتزام بالدفع قد يعرض حسابكم للإيقاف
+
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 2) Methods of Payment: </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> : طرق السداد  </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 2.1. SADAD </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> : سداد  - </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        SADAD is a very convenient method of payment. You can settle  <br />
+                                        your account quickly through all channels offered by your bank  <br />
+                                        (such as Internet, ATM, Smartphone Apps and Telephone  <br />
+                                        Banking). <font color="#ff0000"> " not been activated yet "</font>
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        خدمة سداد تمنحك راحة البال لأنها تتيح لك تسديد حسابك بسهولة وبسرعة متناهية عبر كافة قنوات  <br /> البنوك (أجهزة الصراف الهاتف البنكي، ومن خلال شبكة الإنترنت).
+                                        <font color="#ff0000">     لم تفعل بعد   </font>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>2.2. Bank cheque </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>  : شيك مصرفي   - </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">The Bank cheque should be with the beneficiary name:</font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"> : يجب أن يكون الشيك بإسم  </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> Digital Healthcare Solutions Arabia LLC </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> شركة ديجيتال هيلثكير سوليوشنز العربية المحدودة  </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 2.3. Wire Transfer </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>  : حوالة مصرفية   - </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        Pay your bill through Wire Transfer from your bank account. <br />
+                                        Please note the following details while filling the bank transfer <br />
+                                        form: <br />
+                                        Beneficiary's name: <b>  Digital Healthcare Solutions Arabia LLC </b>
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        كما يمكن السداد عن طريق الحوالة المصرفية وذلك عن طريق المعلومات التالية:  <br />    إسم المستفيد :
+                                        <b> شركة ديجيتال هيلثكير سوليوشنز العربية المحدودة  </b>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">  Account number: <b>  0108 0572 3427 0014</b>  </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        رقم الحساب :
+                                        <b>  0108 0572 3427 0014</b>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"> IBAN number: <b>  SA21 3000 0108 0572 3427 0014</b>  </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        <b>  SA21 3000 0108 0572 3427 0014</b>  :  رقم الأيبان
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">  Beneficiary's Bank: <b> Arab National Bank</b>  </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        بنك المستفيد
+                                        :
+                                        <b> البنك العربي الوطني - فرع الشركات </b>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        It is important to send a copy of the wire transfer receipt <br />
+                                        to <font color="#0000FF"><u> invoices&contracts@dhsarabia.com </u></font>
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        مع ضرورة إرسال نسخة من شعار التحويل البنكي <br />
+                                        <font color="#0000FF"><u> invoices&contracts@dhsarabia.com </u></font> الى
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>3) Reporting, queries or objection: </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> :  الإستفسار أو الإبلاغ عن إعتراض في الفاتورة </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        If you have queries or objections about the charges appearing on <br />
+                                        the invoice, you must inform us by sending an e-mail to <br />
+                                        <font color="#0000FF"> <u> invoices&contracts@dhsarabia.com </u></font> or call the below numbers <br />
+                                        within 15 days only from invoice delivery date. After which, we will <br />
+                                        consider that you agreed on the information mentioned in the <br />
+                                        invoice.
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        إذا كان لديكم أي إستفسار أو إعتراض حول الفاتورة فينبغي الإتصال عن طريق البريد الإلكتروني   <br />
+                                        أو الأرقام المذكورة أدناه في الفاتورة خلال فترة 15 يوم من تاريخ الإستلام بعد ذلك سوف نفترض موافقتكم  <br />
+                                        <font color="#0000FF"> <u> invoices&contracts@dhsarabia.com </u></font>   على صحة ما ورد في الفاتورة
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 4) Lost the invoice: </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>:  فقدان الفاتورة  </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        If your invoice has been lost or damaged please send us an email <br />
+                                        to     <font color="#0000FF"> <u> invoices&contracts@dhsarabia.co </u></font> to request a new original <br />
+                                        invoice.
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        في حالة فقدان أو تلف افاتورة يرجى التواصل عن طريق البريد الإلكتروني لطب فاتورة جديدة  <br />
+                                        <font color="#0000FF"> <u> invoices&contracts@dhsarabia.co </u></font>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 5) Change of data details:</b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>:  تغيير البيانات  </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        If any part of your profile data is incorrect or has to change, please <br />
+                                        send us an email with changes to<br />
+                                        <font color="#0000FF"> <u> invoices&contracts@dhsarabia.co </u></font>
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        في حالة تغيير بيانات مزودي الخدمات الصحية أو شركات التأمين للعنوان أو بيانات الإتصال أو الشخص  <br />
+                                        المسؤول عن الحساب أو أي معلومات مذكورة في الفاتورة يرجى إرسال بريد إلكتروني بنوع التغيير على  <br />
+                                        <font color="#0000FF"> <u> invoices&contracts@dhsarabia.co </u></font>
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b> 6)Suggestions and complaints: </b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2"><b>:   الإقتراحات والشكاوي </b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        If you wish to provide us with your valued suggestions about our  <br />
+                                        services or submit a complaint, please call the customers care  <br />
+                                        number below or send an email to <font color="#0000FF"> <u>  CCC@dhsarabia.com </u>  </font>
+                                    </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2">
+                                        إذا كانت لديكم أي إقتراح أو شكوى يمكنكم الإتصال بخدمة العملاء بالارقام الموضحة أدناه أو ارسال بريد  <br />
+                                        <font color="#0000FF"> <u>  CCC@dhsarabia.com </u>  </font>    إلكتروني على
+                                    </font>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%" align="left" style="text-align:left">
+                                <span style="font-size: 10px; margin:0px   !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2" color="#ff0000"><b> Customer Care Tel: 920000958</b> </font>
+                                </span>
+                            </td>
+                            <td width="50%" align="right" style="text-align: right">
+                                <span style="font-size: 10px; margin:0px !important;padding:0px !important;display:inline-block; ">
+                                    <font size="2" color="#ff0000"><b> هاتف خدمة العملاء : 920000958</b> </font>
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+            </div>
+
+            <div>
+                <section style="margin-top:20px">
+                    <div>
+
+                        <table width="100%">
+                            <tr>
+                                <td width="300">
+                                    <div class="FooterDiv">
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>P.O.BOX 50009 RIYADH 11523 KSA | TEL +966 920000958</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>FAX +966 114944366 | WWW.DHSARABIA.COM</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>C.R. NO. 1010255175 | VAT NO. 300073375400003</font></p>
+                                        <p style="color: #767676; font-size: 10px; margin: 0px 0px 0px;"><font size='2'>PAID CAPITAL 5,000,000 SAR</font></p>
+                                    </div>
+                                </td>
+                                <td align="right" style="text-align: right">
+                                    <img src="https://dhsplatformblobstorage.blob.core.windows.net/dev/Images/quotationImg6.PNG" height="70" width="300" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
