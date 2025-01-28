@@ -1,7 +1,7 @@
 pipeline {
 	agent any
 	
-	staes{
+	stages{
 		stage('Checkout'){
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilities'
