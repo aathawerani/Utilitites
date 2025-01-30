@@ -9,8 +9,10 @@ pipeline {
 		}
 		stage('Build'){
 			steps{
-				bat 'dotnet restore'
-				bat 'dotnet build --configuration Release'
+				dir('GenerateQR\GenerateQR_v3\GenerateQR'){
+					bat 'dotnet restore'
+					bat 'dotnet build --configuration Release'
+				}
 			}
 		}
 	}
