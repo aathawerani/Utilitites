@@ -12,6 +12,13 @@ pipeline {
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
 		}
+		stage('Debug PATH') {
+			steps {
+				bat 'echo %PATH%'
+				bat 'where cmd'
+				bat 'dotnet --version'
+			}
+		}
 		stage('Build'){
 			steps{
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
