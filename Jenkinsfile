@@ -20,6 +20,11 @@ pipeline {
 				}
 			}
 		}
+		stage('Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--format HTML', outdir: 'dependency-check-report'
+            }
+        }
 		stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
@@ -39,4 +44,9 @@ pipeline {
 			}
 		}
 	}
+	post {
+        always {
+            archiveArtifacts artifacts: 'dependency-check-report/*.html', allowEmptyArchive: true
+        }
+    }
 }
