@@ -48,11 +48,11 @@ pipeline {
 			steps {
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
 					script {
-						def imageName = "my-dotnet9-app"
+						def imageName = "my-dotnet8-app"
 						def imageTag = "latest"
 
 						// Build Docker Image
-						bat "docker build -t ${imageName}:${imageTag} ."
+						bat "docker build --no-cache -t ${imageName}:${imageTag} ."
 
 						// (Optional) Push to Docker Hub or Private Registry
 						// bat "docker login -u <username> -p <password>"
