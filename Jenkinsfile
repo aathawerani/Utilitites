@@ -46,7 +46,7 @@ pipeline {
 		}
 		stage('Docker Build & Push') {
 			steps {
-				dir('GenerateQR/GenerateQR_v3/GenerateQR/GenerateQR.Tests') {
+				dir('GenerateQR/GenerateQR_v3/GenerateQR') {
 					script {
 						def imageName = "my-dotnet-framework-app"
 						def imageTag = "latest"
