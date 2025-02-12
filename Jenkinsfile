@@ -44,6 +44,21 @@ pipeline {
 				}
 			}
 		}
+		stage('Docker Build & Push') {
+			steps {
+				script {
+					def imageName = "my-dotnet-framework-app"
+					def imageTag = "latest"
+					
+					// Build Docker Image
+					bat "docker build -t ${imageName}:${imageTag} ."
+					
+					// (Optional) Push to Docker Hub or Private Registry
+					// bat "docker login -u <username> -p <password>"
+					// bat "docker push ${imageName}:${imageTag}"
+				}
+			}
+		}
 	}
 	post {
         always {
