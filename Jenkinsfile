@@ -52,7 +52,7 @@ pipeline {
 						def imageTag = "latest"
 
 						// Build Docker Image
-						bat "docker build --no-cache -t ${imageName}:${imageTag} ."
+						bat "docker build -t ${imageName}:${imageTag} ."
 
 						// (Optional) Push to Docker Hub or Private Registry
 						// bat "docker login -u <username> -p <password>"
