@@ -46,18 +46,16 @@ pipeline {
 		}
 		stage('Docker Build & Push') {
 			steps {
-				dir('GenerateQR/GenerateQR_v3/GenerateQR') {
-					script {
-						def imageName = "my-dotnet-framework-app"
-						def imageTag = "latest"
-						
-						// Build Docker Image
-						bat "docker build -t ${imageName}:${imageTag} ."
-						
-						// (Optional) Push to Docker Hub or Private Registry
-						// bat "docker login -u <username> -p <password>"
-						// bat "docker push ${imageName}:${imageTag}"
-					}
+				script {
+					def imageName = "GenerateQR-app"
+					def imageTag = "latest"
+
+					// Build Docker Image
+					bat "docker build -t ${imageName}:${imageTag} ."
+
+					// (Optional) Push to Docker Hub or Private Registry
+					// bat "docker login -u <username> -p <password>"
+					// bat "docker push ${imageName}:${imageTag}"
 				}
 			}
 		}
