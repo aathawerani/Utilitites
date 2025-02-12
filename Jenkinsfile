@@ -22,10 +22,10 @@ pipeline {
 		}
 		stage('Dependency Check') {
 			steps {
-				dependencyCheckPublisher pattern: '**/dependency-check-report.html', failedTotalHigh: 1
-				bat 'dependency-check.bat --project "QR-code" --scan . --format HTML --out dependency-check-report'
+				bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format HTML --out dependency-check-report'
+				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.html', failedTotalHigh: 1
 			}
-		}
+		}		
 		stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
