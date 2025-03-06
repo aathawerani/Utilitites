@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-dotnet-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-dotnet-app
+  template:
+    metadata:
+      labels:
+        app: my-dotnet-app
+    spec:
+      containers:
+        - name: my-dotnet-app
+          image: my-dotnet8-app:latest
+          ports:
+            - containerPort: 8080
