@@ -64,12 +64,12 @@ pipeline {
 			}
 		}
 		stage('Deploy to Kubernetes using Ansible') {
-            steps {
-                script {
-                    bat "ansible-playbook -i localhost, deploy_app.yaml"
-                }
-            }
-        }
+		    steps {
+		        script {
+		            bat "wsl ansible-playbook -i localhost, deploy_app.yaml"
+		        }
+		    }
+		}
 	}
 	post {
         always {
