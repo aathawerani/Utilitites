@@ -4,6 +4,8 @@ pipeline {
 	environment {
         SONARQUBE_URL = 'http://localhost:9000'
         SONARQUBE_TOKEN = credentials('c5ce0640-9155-42e4-9756-b09c801bf2f1') // Replace with your credential ID
+        DOCKER_IMAGE = "my-dotnet8-app"
+        DOCKER_TAG = "latest"
     }
 	
 	stages{
@@ -61,6 +63,13 @@ pipeline {
 				}
 			}
 		}
+		stage('Deploy to Kubernetes using Ansible') {
+            steps {
+                script {
+                    bat "ansible-playbook -i localhost, deploy_app.yaml"
+                }
+            }
+        }
 	}
 	post {
         always {
