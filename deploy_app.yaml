@@ -1,0 +1,11 @@
+- name: Deploy Application to Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Apply Kubernetes Deployment
+      kubernetes.core.k8s:
+        state: present
+        src: deployment.yaml
+    - name: Apply Kubernetes Service
+      kubernetes.core.k8s:
+        state: present
+        src: service.yaml
