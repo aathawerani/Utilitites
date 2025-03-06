@@ -47,21 +47,18 @@ pipeline {
 			}
 		}
 		stage('Docker Build & Push') {
-			steps {
-				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
-					script {
-						def imageName = "my-dotnet8-app"
-						def imageTag = "latest"
+		    steps {
+		        script {
+		            def imageName = "my-dotnet8-app"
+		            def imageTag = "latest"
 
-						// Build Docker Image
-						bat "docker build -t ${imageName}:${imageTag} ."
+		            // Build Docker Image
+		            bat "docker build -t ${imageName}:${imageTag} ."
 
-						// (Optional) Push to Docker Hub or Private Registry
-						// bat "docker login -u <username> -p <password>"
-						// bat "docker push ${imageName}:${imageTag}"
-					}
-				}
-			}
+		            // Load image into Kubernetes (if using local images)
+		            bat "kind load docker-image ${imageName}:${imageTag}"
+		        }
+		    }
 		}
 		stage('Deploy to Kubernetes using Ansible') {
 		    steps {
