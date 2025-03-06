@@ -4,8 +4,9 @@
     - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
         state: present
-        src: deployment.yaml
+        src: k8s/deployment.yaml
+
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
         state: present
-        src: service.yaml
+        src: k8s/service.yaml
