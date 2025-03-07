@@ -11,7 +11,7 @@ pipeline {
 	stages{
 		stage('Checkout'){
 			steps{
-				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites'
+				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
 		}
 		stage('Build'){
