@@ -9,7 +9,7 @@ pipeline {
     }
 	
 	stages{
-		stage('Checkout'){
+		stage('Checkout 1'){
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
