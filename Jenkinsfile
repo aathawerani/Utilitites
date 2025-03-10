@@ -32,9 +32,9 @@ pipeline {
 		    steps {
 		        withSonarQubeEnv('SonarQube') {
 		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
-		                bat '"%USERPROFILE%\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
+		                bat '"D:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
 		                bat 'dotnet build --configuration Release'
-		                bat '"%USERPROFILE%\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
+		                bat '"D:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
 		            }
 		        }
 		    }
