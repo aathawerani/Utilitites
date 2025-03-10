@@ -70,7 +70,7 @@ pipeline {
 	}
 	post {
         always {
-            archiveArtifacts artifacts: 'dependency-check-report/*.html', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'dependency-check-report/*.xml', allowEmptyArchive: true
         }
     }
 }
