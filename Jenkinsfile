@@ -68,13 +68,4 @@ pipeline {
 		    }
 		}
 	}
-	post {
-	        always {
-	            // Archive the report so it can be viewed later
-	            archiveArtifacts artifacts: 'dependency-check-report/dependency-check-report.xml', fingerprint: true
-
-	            // Publish Dependency-Check results in Jenkins
-	            step([$class: 'DependencyCheckPublisher', pattern: 'dependency-check-report/dependency-check-report.xml'])
-	        }
-	    }
 }
