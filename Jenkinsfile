@@ -64,7 +64,7 @@ pipeline {
 
 		            // Create a pull request using GitHub API
 		            bat """
-		                curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+		                curl -k -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
 		                -H "Accept: application/vnd.github.v3+json" \
 		                https://api.github.com/repos/${REPO}/pulls \
 		                -d "{\\\"title\\\": \\\"${PR_TITLE}\\\", \\\"body\\\": \\\"${PR_BODY}\\\", \\\"head\\\": \\\"${SOURCE_BRANCH}\\\", \\\"base\\\": \\\"${TARGET_BRANCH}\\\"}"
