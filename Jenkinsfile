@@ -28,7 +28,7 @@ pipeline {
 				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.xml', failedTotalHigh: 1
 			}
 		}		
-		stage('SonarQube Analysis') {
+		stage('SonarQube Analysis 1') {
 		    steps {
 		        withSonarQubeEnv('SonarQube') {
 		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
