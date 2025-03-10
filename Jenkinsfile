@@ -29,16 +29,16 @@ pipeline {
 			}
 		}		
 		stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-					dir('GenerateQR/GenerateQR_v3/GenerateQR'){
-						bat 'dotnet sonarscanner begin /k:"QR-code" /d:sonar.host.url=%SONARQUBE_URL% /d:sonar.login=%SONARQUBE_TOKEN%'
-						bat 'dotnet build --configuration Release'
-						bat 'dotnet sonarscanner end /d:sonar.login=%SONARQUBE_TOKEN%'
-					}
-				}
-            }
-        }
+		    steps {
+		        withSonarQubeEnv('SonarQube') {
+		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		                bat '"%USERPROFILE%\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
+		                bat 'dotnet build --configuration Release'
+		                bat '"%USERPROFILE%\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
+		            }
+		        }
+		    }
+		}
 		stage('Run Tests') {
 			steps {
 				dir('GenerateQR/GenerateQR_v3/GenerateQR/GenerateQR.Tests') {
