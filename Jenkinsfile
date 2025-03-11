@@ -11,7 +11,7 @@ pipeline {
 		stage('Check Branch') {
 		    steps {
 		        script {
-		            def branch = bat(script: 'git branch --contains HEAD | findstr /R /V /C:"detached" ', returnStdout: true).trim()
+		            def branch = bat(script: 'git show-branch --current', returnStdout: true).trim()
 		            echo "Detected Git branch: ${branch}"
 
 		            if (branch.contains("deployment")) {
