@@ -54,7 +54,7 @@ pipeline {
                         def issueBody = issue
 						withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
 						    bat """
-						        curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+						        "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
 						             -H "Accept: application/vnd.github.v3+json" ^
 						             https://api.github.com/repos/${GITHUB_REPO}/issues ^
 						             -d "{\\"title\\": \\"${issueTitle}\\", \\"body\\": \\"${issueBody}\\", \\"labels\\": [\\"security\\"]}"
