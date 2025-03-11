@@ -10,7 +10,7 @@ pipeline {
 	stages{
 		stage('Skip Deployment Branch') {
             when {
-                expression { env.BRANCH_NAME == 'deployment' }
+                expression { env.GIT_BRANCH == 'origin/deployment' }
             }
             steps {
                 script {
