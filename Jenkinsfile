@@ -10,6 +10,9 @@ pipeline {
 	
 	stages{
 		stage('Checkout'){
+			when {
+                branch 'main'  // Ensures only 'main' triggers builds
+            }
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
