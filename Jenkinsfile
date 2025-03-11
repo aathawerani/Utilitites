@@ -7,21 +7,6 @@ pipeline {
         TARGET_BRANCH = 'staging'  // Change to the branch you want to merge to
     }
 	stages{
-		stage('Check Branch') {
-		    steps {
-		        script {
-		            def branch = bat(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-		            branch = branch.replace('remotes/origin/', '').trim()  // Clean up remote refs
-		            echo "Detected Git branch: ${branch}"
-
-		            if (branch == 'deployment') {
-		                echo "Skipping build because this is the deployment branch."
-		                currentBuild.result = 'ABORTED'
-		                error("Build stopped for deployment branch.")
-		            }
-		        }
-		    }
-		}
 		stage('Checkout'){
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
@@ -41,6 +26,13 @@ pipeline {
 				}
 			}
 		}
+		stage('Clean Workspace') {
+		    steps {
+		        dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		            bat 'dotnet clean'
+		        }
+		    }
+		}		
 		stage('Create Pull Request to Deployment') {
 		    steps {
 		        script {
