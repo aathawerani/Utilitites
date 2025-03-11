@@ -8,18 +8,14 @@ pipeline {
     }
 	
 	stages{
-		stage('Skip Deployment Branch') {
-            when {
-                expression { env.GIT_BRANCH == 'origin/deployment' }
-            }
-            steps {
-                script {
-                    echo "Skipping build because this is the deployment branch."
-                    currentBuild.result = 'ABORTED'
-                    error("Build stopped for deployment branch.")
-                }
-            }
-        }
+		stage('Check Branch') {
+		    steps {
+		        script {
+		            echo "Current branch detected: ${env.BRANCH_NAME}"
+		            echo "Current branch detected: ${env.GIT_BRANCH}"
+		        }
+		    }
+		}
 		stage('Checkout'){
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
