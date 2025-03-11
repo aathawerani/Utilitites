@@ -6,21 +6,65 @@ pipeline {
         GIT_CREDENTIALS_ID = 'github-credentials'
         TARGET_BRANCH = 'staging'  // Change to the branch you want to merge to
     }
+	
 	stages{
 		stage('Check Branch') {
 		    steps {
 		        script {
-		            def branch = bat(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-		            branch = branch.replace('remotes/origin/', '').trim()  // Clean up remote refs
+		            def branch = bat(script: 'git name-rev --name-only HEAD', returnStdout: true).trim()
 		            echo "Detected Git branch: ${branch}"
 
-		            if (branch == 'deployment') {
+		            if (branch.contains("deployment")) {
 		                echo "Skipping build because this is the deployment branch."
 		                currentBuild.result = 'ABORTED'
 		                error("Build stopped for deployment branch.")
 		            }
 		        }
 		    }
+		}
+		stage('Checkout'){
+			steps{
+				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
+			}
+		}
+		stage('Dependency Check') {
+			steps {
+				bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.xml', failedTotalHigh: 1
+			}
+		}		
+		stage('Build'){
+			steps{
+				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
+					bat 'dotnet restore'
+					bat 'dotnet build --configuration Release'
+				}
+			}
+		}
+		stage('Clean Workspace') {
+		    steps {
+		        dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		            bat 'dotnet clean'
+		        }
+		    }
+		}		
+		stage('SonarQube Analysis') {
+		    steps {
+		        withSonarQubeEnv('SonarQube') {
+		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
+		                bat 'dotnet build --configuration Release'
+		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
+		            }
+		        }
+		    }
+		}
+		stage('Run Tests') {
+			steps {
+				dir('GenerateQR/GenerateQR_v3/GenerateQR/GenerateQR.Tests') {
+					bat 'dotnet test --logger trx --results-directory TestResults'
+				}
+			}
 		}
 		stage('Create Pull Request to Deployment') {
 		    steps {
