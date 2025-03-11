@@ -26,13 +26,17 @@ pipeline {
 				}
 			}
 		}
-		stage('Clean Workspace') {
+		stage('SonarQube Analysis') {
 		    steps {
-		        dir('GenerateQR/GenerateQR_v3/GenerateQR') {
-		            bat 'dotnet clean'
+		        withSonarQubeEnv('SonarQube') {
+		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
+		                bat 'dotnet build --configuration Release'
+		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
+		            }
 		        }
 		    }
-		}		
+		}
 		stage('Create Pull Request to Deployment') {
 		    steps {
 		        script {
