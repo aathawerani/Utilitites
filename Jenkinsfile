@@ -64,7 +64,7 @@ pipeline {
 
 		            // Create a pull request using GitHub API
 					bat """
-					    "C:\\Program Files\\Git\\mingw64\\bin\\curl.exe" -X POST ^
+					    "D:\\DevOps\\curl\\bin\\curl.exe" -X POST ^
 					         -H "Authorization: token ${GITHUB_TOKEN}" ^
 					         -H "Accept: application/vnd.github.v3+json" ^
 					         --cacert "D:\\DevOps\\certificates\\cacert.pem" ^
