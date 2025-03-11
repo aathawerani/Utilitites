@@ -4,9 +4,7 @@ pipeline {
         SONARQUBE_URL = 'http://localhost:9000'
         SONARQUBE_TOKEN = credentials('c5ce0640-9155-42e4-9756-b09c801bf2f1') // Replace with your credential ID
         GIT_CREDENTIALS_ID = 'github-credentials'
-        GITHUB_REPO = 'aathawerani/Utilitites'
-        GITHUB_TOKEN = credentials('github-token')
-        EMAIL_RECIPIENT = 'athawerani@gmail.com'
+        TARGET_BRANCH = 'staging'  // Change to the branch you want to merge to
     }
 	stages{
 		stage('Checkout'){
@@ -15,58 +13,11 @@ pipeline {
 			}
 		}
 		stage('Dependency Check') {
-            steps {
-                bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
-            }
-        }
-        stage('Process Dependency-Check Results') {
-            steps {
-                script {
-                    def reportFile = 'dependency-check-report/dependency-check-report.json'
-                    def criticalIssues = []
-                    def allIssues = []
-
-                    // Parse JSON report
-                    def jsonReport = readJSON file: reportFile
-                    for (dep in jsonReport.dependencies) {
-                        for (vuln in dep.vulnerabilities) {
-                            def issue = "[${vuln.severity}] ${vuln.name}: ${vuln.description}"
-                            allIssues.add(issue)
-
-                            if (vuln.severity == "Critical") {
-                                criticalIssues.add(issue)
-                            }
-                        }
-                    }
-
-                    // Send email if critical issues are found
-                    if (criticalIssues.size() > 0) {
-                        emailext (
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Critical Security Issues Detected in Dependency-Check",
-                            body: "The following critical vulnerabilities were found:\n\n" + criticalIssues.join("\n")
-                        )
-                    }
-
-                    // Create GitHub Issues for all vulnerabilities
-                    for (issue in allIssues) {
-                        def issueTitle = issue.split(":")[0]
-                        def issueBody = issue
-                        sh """
-                            curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                                 -H "Accept: application/vnd.github.v3+json" \
-                                 https://api.github.com/repos/${GITHUB_REPO}/issues \
-                                 -d '{\"title\": \"${issueTitle}\", \"body\": \"${issueBody}\", \"labels\": [\"security\"]}'
-                        """
-                    }
-
-                    // Fail pipeline only if critical issues exist
-                    if (criticalIssues.size() > 0) {
-                        error "Pipeline halted due to critical security vulnerabilities."
-                    }
-                }
-            }
-        }
+			steps {
+				bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.xml', failedTotalHigh: 1
+			}
+		}
 		stage('Build'){
 			steps{
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
