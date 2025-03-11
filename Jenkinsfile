@@ -1,9 +1,6 @@
 pipeline {
 	agent any
 	environment {
-        BRANCH_NAME = env.BRANCH_NAME  // Capture branch name
-    }
-	environment {
         SONARQUBE_URL = 'http://localhost:9000'
         SONARQUBE_TOKEN = credentials('c5ce0640-9155-42e4-9756-b09c801bf2f1') // Replace with your credential ID
         GIT_CREDENTIALS_ID = 'github-credentials'
