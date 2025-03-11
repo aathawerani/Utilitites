@@ -37,6 +37,13 @@ pipeline {
 		        }
 		    }
 		}
+		stage('Run Tests') {
+			steps {
+				dir('GenerateQR/GenerateQR_v3/GenerateQR/GenerateQR.Tests') {
+					bat 'dotnet test --logger trx --results-directory TestResults'
+				}
+			}
+		}
 		stage('Create Pull Request to Deployment') {
 		    steps {
 		        script {
