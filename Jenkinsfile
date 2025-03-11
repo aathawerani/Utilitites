@@ -33,6 +33,14 @@ pipeline {
 				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.xml', failedTotalHigh: 1
 			}
 		}
+		stage('Build'){
+			steps{
+				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
+					bat 'dotnet restore'
+					bat 'dotnet build --configuration Release'
+				}
+			}
+		}
 		stage('Create Pull Request to Deployment') {
 		    steps {
 		        script {
