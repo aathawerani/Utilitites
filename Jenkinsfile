@@ -28,6 +28,13 @@ pipeline {
 				}
 			}
 		}
+		stage('Clean Workspace') {
+		    steps {
+		        dir('GenerateQR/GenerateQR_v3/GenerateQR') {
+		            bat 'dotnet clean'
+		        }
+		    }
+		}		
 		stage('SonarQube Analysis') {
 		    steps {
 		        withSonarQubeEnv('SonarQube') {
