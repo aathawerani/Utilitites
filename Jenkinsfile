@@ -27,6 +27,12 @@ pipeline {
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
 		}
+		stage('Dependency Check') {
+			steps {
+				bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+				dependencyCheckPublisher pattern: '**/dependency-check-report/dependency-check-report.xml', failedTotalHigh: 1
+			}
+		}
 		stage('Create Pull Request to Deployment') {
 		    steps {
 		        script {
