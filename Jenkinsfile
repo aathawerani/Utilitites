@@ -12,7 +12,9 @@ pipeline {
 		    steps {
 		        script {
 		            echo "Current branch detected: ${env.BRANCH_NAME}"
-		            echo "Current branch detected: ${env.GIT_BRANCH}"
+		            echo "Current branch detected : ${env.GIT_BRANCH}"
+		            def branch = bat(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+            		echo "Detected Git branch: ${branch}"
 		        }
 		    }
 		}
