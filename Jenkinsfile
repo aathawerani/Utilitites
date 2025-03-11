@@ -1,6 +1,5 @@
 pipeline {
 	agent any
-	
 	environment {
         SONARQUBE_URL = 'http://localhost:9000'
         SONARQUBE_TOKEN = credentials('c5ce0640-9155-42e4-9756-b09c801bf2f1') // Replace with your credential ID
@@ -9,10 +8,19 @@ pipeline {
     }
 	
 	stages{
-		stage('Checkout'){
-			when {
-                branch 'main'  // Ensures only 'main' triggers builds
+		stage('Skip Deployment Branch') {
+            when {
+                expression { env.BRANCH_NAME == 'deployment' }
             }
+            steps {
+                script {
+                    echo "Skipping build because this is the deployment branch."
+                    currentBuild.result = 'ABORTED'
+                    error("Build stopped for deployment branch.")
+                }
+            }
+        }
+		stage('Checkout'){
 			steps{
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
