@@ -11,8 +11,14 @@ pipeline {
 		stage('Check Branch') {
 		    steps {
 		        script {
-		            def branch = bat(script: 'git symbolic-ref --short HEAD || git branch --show-current || git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+		            def branch = bat(script: 'git for-each-ref --format="%(refname:short)" refs/heads --contains HEAD', returnStdout: true).trim()
 		            echo "Detected Git branch: ${branch}"
+
+		            if (branch == 'deployment') {
+		                echo "Skipping build because this is the deployment branch."
+		                currentBuild.result = 'ABORTED'
+		                error("Build stopped for deployment branch.")
+		            }
 		        }
 		    }
 		}
