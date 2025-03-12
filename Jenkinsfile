@@ -40,6 +40,7 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
+						response = response.substring(response.indexOf("["))
                         echo "GitHub API Response: ${response}" 
 
                     	echo "Parsing response."
