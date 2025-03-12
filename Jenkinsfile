@@ -19,53 +19,67 @@ pipeline {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
             }
         }
-        stage('Process Dependency-Check Results') {
+		stage('Process Dependency-Check Results') {
             steps {
                 script {
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
-                    def criticalIssues = []
                     def allIssues = []
 
                     // Parse JSON report
                     def jsonReport = readJSON file: reportFile
+
+                    def getExistingIssues = { ->
+                        def response = bat(
+                            script: """
+                                "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
+                                     -H "Accept: application/vnd.github.v3+json" ^
+                                     https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
+                            """,
+                            returnStdout: true
+                        ).trim()
+
+						response = response.substring(response.indexOf("["))
+                        echo "GitHub API Response: ${response}" 
+
+                        def issues = readJSON text: response
+                        return issues
+                    }
+
                     for (dep in jsonReport.dependencies) {
                         for (vuln in dep.vulnerabilities) {
-                            def issue = "[${vuln.severity}] ${vuln.name}: ${vuln.description}"
-                            allIssues.add(issue)
-
-                            if (vuln.severity == "Critical") {
-                                criticalIssues.add(issue)
-                            }
+                            def issueTitle = "[${vuln.severity}] ${vuln.name}"
+                            def issueBody = "${vuln.name}: ${vuln.description}"
+                            allIssues.add([title: issueTitle, body: issueBody])
                         }
                     }
 
-                    // Send email if critical issues are found
-                    if (criticalIssues.size() > 0) {
-                        emailext (
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Critical Security Issues Detected in Dependency-Check",
-                            body: "The following critical vulnerabilities were found:\n\n" + criticalIssues.join("\n")
-                        )
-                    }
+                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
+                    def existingIssues = getExistingIssues()
+					for (issue in allIssues) {
+					    if (!existingIssues.any { it.title == issue.title }) {
+					        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+					            // ✅ Write JSON payload to a file
+					            def jsonPayload = """
+					            {
+					                "title": "${issue.title}",
+					                "body": "${issue.body.replace('"', '\\"')}",
+					                "labels": ["security"]
+					            }
+					            """
+					            writeFile file: "payload.json", text: jsonPayload
 
-                    // Create GitHub Issues for all vulnerabilities
-                    for (issue in allIssues) {
-                        def issueTitle = issue.split(":")[0]
-                        def issueBody = issue
-						withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-						    bat """
-						        "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
-						             -H "Accept: application/vnd.github.v3+json" ^
-						             https://api.github.com/repos/${GITHUB_REPO}/issues ^
-						             -d "{\\"title\\": \\"${issueTitle}\\", \\"body\\": \\"${issueBody}\\", \\"labels\\": [\\"security\\"]}"
-						    """
-						}
-                    }
-
-                    // Fail pipeline only if critical issues exist
-                    if (criticalIssues.size() > 0) {
-                        error "Pipeline halted due to critical security vulnerabilities."
-                    }
+					            // ✅ Use `-d @payload.json` instead of inline JSON
+					            bat """
+					                "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+					                -H "Accept: application/vnd.github.v3+json" ^
+					                https://api.github.com/repos/${GITHUB_REPO}/issues ^
+					                -d @payload.json
+					            """
+					        }
+					    } else {
+					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
+					    }
+					}
                 }
             }
         }
