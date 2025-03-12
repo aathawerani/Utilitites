@@ -40,6 +40,8 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
+                        echo "GitHub API Response: ${response}" 
+
                     	echo "Parsing response."
                         def issues = readJSON text: response
                     	echo "Response parsed."
