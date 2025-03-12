@@ -22,8 +22,14 @@ pipeline {
 		stage('Process Dependency-Check Results') {
             steps {
                 script {
+                    echo "Parsing file."
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
-                    
+                    def allIssues = []
+
+                    // Parse JSON report
+                    def jsonReport = readJSON file: reportFile
+                    echo "File parsed."
+
                     def doesIssueExist = { issueTitle ->
                         def response = bat(
                             script: """
@@ -34,14 +40,12 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
+                    	echo "Parsing response."
                         def issues = readJSON text: response
+                    	echo "Response parsed."
                         return issues.any { it.title == issueTitle }
                     }
 
-                    def allIssues = []
-
-                    // Parse JSON report
-                    def jsonReport = readJSON file: reportFile
                     for (dep in jsonReport.dependencies) {
                         for (vuln in dep.vulnerabilities) {
                             def issueTitle = "[${vuln.severity}] ${vuln.name}"
