@@ -58,7 +58,9 @@ pipeline {
                             def issueTitle = "[${vuln.severity}] ${vuln.name}"
                             def issueBody = "${vuln.name}: ${vuln.description}"
                             allIssues.add([title: issueTitle, body: issueBody])
+    		                echo "checking critical."
                             if (vuln.severity == "Critical") {
+    		                	echo "adding critical."
 		                        criticalIssues.add(issueTitle + ": " + issueBody)
 		                    }
                         }
@@ -99,7 +101,7 @@ pipeline {
 		                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
 		            )
 		            echo "Email sent with full dependency-check report."
-		            
+
 		            if (!criticalIssues.isEmpty()) {
 					    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
 					} else {
