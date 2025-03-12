@@ -17,13 +17,6 @@ pipeline {
 		stage('Dependency Check') {
             steps {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
-                dependencyCheckPublisher( //not working in my case
-				    pattern: '**/dependency-check-report/dependency-check-report.xml',
-				    failedTotalCritical: 1,  // Pipeline fails if at least 1 Critical issue exists
-				    unstableTotalCritical: 1
-				    //failedTotalHigh: 3,      // Pipeline fails if 3+ High issues exist
-				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
-				)
                 script {
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
