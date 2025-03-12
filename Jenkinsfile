@@ -59,7 +59,9 @@ pipeline {
 
                     // ✅ Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
+                	echo "Got here 1."
                     for (issue in allIssues) {
+                		echo "Got here 2."
                         if (!existingIssues.any { it.title == issueTitle }) {
                             withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                                 bat """
