@@ -180,36 +180,35 @@ pipeline {
 		}
 	}
 	post {
-        failure {
-            script {
-                def failedStage = ''
-                def logs = ''
+	    failure {
+	        script {
+	            def failedStage = env.STAGE_NAME  // ✅ Detect the stage that failed
+	            def logs = ''
 
-                // ✅ Detect the failed stage
-                for (stage in currentBuild.rawBuild.getActions(hudson.model.ErrorAction)) {
-                    failedStage = stage.displayName
-                    break // Stop after the first failed stage
-                }
+	            // ✅ Get the last 50 lines of logs (without using `getRawBuild()`)
+	            try {
+	                logs = currentBuild.getBuildCauses().toString() + "\n\n" +
+	                       manager.build.logFile.text.readLines().takeRight(50).join('\n')
+	            } catch (Exception e) {
+	                logs = "Failed to retrieve logs."
+	            }
 
-                // ✅ Get the last 50 lines of Jenkins logs
-                logs = currentBuild.rawBuild.getLog(50).join('\n')
+	            echo "🚨 Pipeline failed in stage: ${failedStage}"
 
-                echo "🚨 Pipeline failed in stage: ${failedStage}"
-
-                mail(
-                    to: "${EMAIL_RECIPIENT}",
-                    subject: "🚨 Jenkins Pipeline Failed in Stage: ${failedStage}",
-                    body: """<html>
-                    <body>
-                    <h2>⚠️ Jenkins Pipeline Failure Notification</h2>
-                    <p><b>Failed Stage:</b> ${failedStage}</p>
-                    <p><b>Error Logs:</b></p>
-                    <pre>${logs}</pre>
-                    <p>Please check the Jenkins logs for more details.</p>
-                    </body></html>""",
-                    mimeType: 'text/html'
-                )
-            }
-        }
-    }
+	            mail(
+	                to: "${EMAIL_RECIPIENT}",
+	                subject: "🚨 Jenkins Pipeline Failed in Stage: ${failedStage}",
+	                body: """<html>
+	                <body>
+	                <h2>⚠️ Jenkins Pipeline Failure Notification</h2>
+	                <p><b>Failed Stage:</b> ${failedStage}</p>
+	                <p><b>Error Logs:</b></p>
+	                <pre>${logs}</pre>
+	                <p>Please check the Jenkins logs for more details.</p>
+	                </body></html>""",
+	                mimeType: 'text/html'
+	            )
+	        }
+	    }
+	}
 }
