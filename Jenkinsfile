@@ -56,6 +56,7 @@ pipeline {
                     // ✅ Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
                     for (issue in allIssues) {
+						echo "Got here 1"
                         if (!existingIssues.any { it.title == issue.title }) {
                         	echo "Creating issue: ${issueTitle}"
 							echo "Issue body: ${issueBody}"
@@ -71,6 +72,7 @@ pipeline {
                             echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
                         }
                     }
+					echo "stage complete"
                 }
             }
         }
