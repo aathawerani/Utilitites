@@ -16,7 +16,7 @@ pipeline {
 		}
 		stage('Dependency Check') {
             steps {
-                bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+                bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
             }
         }
 		stage('Process Dependency-Check Results') {
@@ -91,14 +91,27 @@ pipeline {
 					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
 					    }
 					}
-					 mail(
+					def htmlReport = 'dependency-check-report/dependency-check-report.html'
+					if (!fileExists(htmlReport)) {
+		                error "Dependency-Check HTML report not found. Skipping email."
+		            }
+
+		            def htmlContent = readFile(htmlReport)
+
+					mail(
 				        to: "${EMAIL_RECIPIENT}",
-				        subject: "📊 Dependency-Check Report",
-				        body: "Attached is the full Dependency-Check security report.\n\nCheck Jenkins logs for more details."
+				        subject: "Dependency-Check Report",
+				        body: """<html>
+			                <body>
+			                <p>Attached below is the security report.</p>
+			                ${htmlContent}
+			                </body></html>""",
+			                mimeType: 'text/html'
 				    )
+				    echo "✅ Email sent with embedded HTML Dependency-Check report."
 		            if (!criticalIssues.isEmpty()) {
-					    //error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					    echo "Critical issues found. Pipeline continuing for testing."
+					    error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
+					    //echo "Critical issues found. Pipeline continuing for testing."
 					} else {
 		                echo "No critical issues found. Pipeline continuing."
 		            }
