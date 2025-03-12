@@ -17,6 +17,13 @@ pipeline {
 		stage('Dependency Check') {
             steps {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+                dependencyCheckPublisher( //not working in my case
+				    pattern: '**/dependency-check-report/dependency-check-report.xml',
+				    failedTotalCritical: 1,  // Pipeline fails if at least 1 Critical issue exists
+				    unstableTotalCritical: 1
+				    //failedTotalHigh: 3,      // Pipeline fails if 3+ High issues exist
+				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
+				)
                 script {
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
@@ -94,23 +101,25 @@ pipeline {
 
 		            def htmlContent = readFile(htmlReport)
 
-					mail(
-				        to: "${EMAIL_RECIPIENT}",
-				        subject: "Dependency-Check Report",
-				        body: """<html>
-			                <body>
-			                <p>Attached below is the security report.</p>
-			                ${htmlContent}
-			                </body></html>""",
-			                mimeType: 'text/html'
-				    )
-				    echo "✅ Email sent with embedded HTML Dependency-Check report."
-		            if (!criticalIssues.isEmpty()) {
+		            if (!allIssues.isEmpty()) {
+						mail(
+					        to: "${EMAIL_RECIPIENT}",
+					        subject: "Dependency-Check Report",
+					        body: """<html>
+				                <body>
+				                <p>Attached below is the security report.</p>
+				                ${htmlContent}
+				                </body></html>""",
+				                mimeType: 'text/html'
+					    )
+					    echo "✅ Email sent with embedded HTML Dependency-Check report."
+					}
+		            //if (!criticalIssues.isEmpty()) {
 					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					    echo "Critical issues found. Pipeline continuing for testing."
-					} else {
-		                echo "No critical issues found. Pipeline continuing."
-		            }
+					    //echo "Critical issues found. Pipeline continuing for testing."
+					//} else {
+		                //echo "No critical issues found. Pipeline continuing."
+		            //}
                 }
             }
         }
