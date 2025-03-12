@@ -198,11 +198,9 @@ pipeline {
 	    failure {
 	        script {
 	            def logs = ''
-	            echo "stage: "
-	            echo env.STAGE_NAME
 	            // ✅ Get the last 50 lines of logs (without using `getRawBuild()`)
 	            try {
-	                logs = manager.build.logFile.text.readLines().takeRight(50).join('\n')  // ✅ Safe way to get last 50 logs
+	                logs = currentBuild.getLog(50).join('\n')
 	            } catch (Exception e) {
 	                logs = "Failed to retrieve logs."
 	            }
