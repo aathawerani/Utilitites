@@ -49,7 +49,7 @@ pipeline {
 		                ).trim()
 
 		                response = response.substring(response.indexOf("["))
-		                return readJSON text: response
+		                return readJSON(text: response)
 		            }
 
 		            for (dep in jsonReport.dependencies) {
