@@ -200,7 +200,7 @@ pipeline {
 	            def logs = ''
 	            // ✅ Get the last 50 lines of logs (without using `getRawBuild()`)
 	            try {
-	                logs = Jenkins.instance.getItemByFullName(env.JOB_NAME).getBuildByNumber(env.BUILD_NUMBER.toInteger()).getLog(50).join('\n')
+	                logs = run.getLog(50).join('\n')
 	            } catch (Exception e) {
 	                logs = "Failed to retrieve logs."
 	            }
