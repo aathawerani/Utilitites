@@ -194,33 +194,4 @@ pipeline {
 		    }
 		}
 	}
-	post {
-	    failure {
-	        script {
-
-	            def logs = ''
-	            def logFile = "${JENKINS_HOME}/jobs/${env.JOB_NAME}/builds/${env.BUILD_NUMBER}/log"
-	            if (fileExists(logFile)) {
-	                logs = readFile(logFile).split("\n").takeRight(50).join("\n")
-	            else
-	            	logs = "log file not found"
-
-	            echo "Pipeline failed in stage: ${failedStage}"
-
-	            mail(
-	                to: "${EMAIL_RECIPIENT}",
-	                subject: "Jenkins Pipeline Failed in Stage: ${failedStage}",
-	                body: """<html>
-	                <body>
-	                <h2>Jenkins Pipeline Failure Notification</h2>
-	                <p><b>Failed Stage:</b> ${failedStage}</p>
-	                <p><b>Error Logs:</b></p>
-	                <pre>${logs}</pre>
-	                <p>Please check the Jenkins logs for more details.</p>
-	                </body></html>""",
-	                mimeType: 'text/html'
-	            )
-	        }
-	    }
-	}
 }
