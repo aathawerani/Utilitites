@@ -20,13 +20,13 @@ pipeline {
             }
         }
 		stage('Process Dependency-Check Results') {
-		    steps {
-		        script {
-		            def reportFile = 'dependency-check-report/dependency-check-report.json'
-		            def allIssues = []
-		            def criticalIssues = []
+            steps {
+                script {
+                    def reportFile = 'dependency-check-report/dependency-check-report.json'
+                    def allIssues = []
+                    def criticalIssues = [] 
 
-		            if (!fileExists(reportFile)) {
+                    if (!fileExists(reportFile)) {
 		                error "Dependency-Check JSON report not found. Failing pipeline."
 		            }
 
@@ -35,85 +35,79 @@ pipeline {
 		                error "Dependency-Check JSON report is empty. Failing pipeline."
 		            }
 
-		            // ✅ Parse JSON report
-		            def jsonReport = readJSON text: jsonText
+                    // Parse JSON report
+                    def jsonReport = readJSON file: reportFile
 
-		            def getExistingIssues = { ->
-		                def response = bat(
-		                    script: """
-		                        "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
-		                        -H "Accept: application/vnd.github.v3+json" ^
-		                        https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
-		                    """,
-		                    returnStdout: true
-		                ).trim()
+                    def getExistingIssues = { ->
+                        def response = bat(
+                            script: """
+                                "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
+                                     -H "Accept: application/vnd.github.v3+json" ^
+                                     https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-		                response = response.substring(response.indexOf("["))
-		                return readJSON(text: response)
-		            }
+						response = response.substring(response.indexOf("["))
+                        def issues = readJSON text: response
+                        return issues
+                    }
 
-		            for (dep in jsonReport.dependencies) {
-		                for (vuln in dep.vulnerabilities) {
-		                    def issueTitle = "[${vuln.severity}] ${vuln.name}"
-		                    def issueBody = "${vuln.name}: ${vuln.description}"
-		                    allIssues.add([title: issueTitle, body: issueBody])
-
-		                    if (vuln.severity == "Critical") {
+                    for (dep in jsonReport.dependencies) {
+                        for (vuln in dep.vulnerabilities) {
+                            def issueTitle = "[${vuln.severity}] ${vuln.name}"
+                            def issueBody = "${vuln.name}: ${vuln.description}"
+                            allIssues.add([title: issueTitle, body: issueBody])
+                            if (vuln.severity == "Critical") {
 		                        criticalIssues.add(issueTitle + ": " + issueBody)
 		                    }
-		                }
+                        }
+                    }
+
+                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
+                    def existingIssues = getExistingIssues()
+					for (issue in allIssues) {
+					    if (!existingIssues.any { it.title == issue.title }) {
+					        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+					            // ✅ Write JSON payload to a file
+					            def jsonPayload = """
+					            {
+					                "title": "${issue.title}",
+					                "body": "${issue.body.replace('"', '\\"')}",
+					                "labels": ["security"]
+					            }
+					            """
+					            writeFile file: "payload.json", text: jsonPayload
+
+					            // ✅ Use `-d @payload.json` instead of inline JSON
+					            bat """
+					                "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+					                -H "Accept: application/vnd.github.v3+json" ^
+					                https://api.github.com/repos/${GITHUB_REPO}/issues ^
+					                -d @payload.json
+					            """
+					        }
+					    } else {
+					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
+					    }
+					}
+
+					emailext (
+		                to: "${EMAIL_RECIPIENT}",
+		                subject: "📊 Dependency-Check Report: Security Analysis",
+		                body: "Attached is the full Dependency-Check security report.\n\nCritical Issues: ${criticalIssues.size()}\n\nPipeline execution: ${criticalIssues.size() > 0 ? 'HALTED 🚨' : 'CONTINUING ✅'}",
+		                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
+		            )
+		            echo "Email sent with full dependency-check report."
+		            
+		            if (!criticalIssues.isEmpty()) {
+					    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
+					} else {
+		                echo "No critical issues found. Pipeline continuing."
 		            }
-
-		            def existingIssues = getExistingIssues()
-
-		            for (issue in allIssues) {
-		                if (!existingIssues.any { it.title == issue.title }) {
-		                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-		                        def jsonPayload = """
-		                        {
-		                            "title": "${issue.title}",
-		                            "body": "${issue.body.replace('"', '\\"')}",
-		                            "labels": ["security"]
-		                        }
-		                        """
-		                        writeFile file: "payload.json", text: jsonPayload
-
-		                        bat """
-		                            "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
-		                            -H "Accept: application/vnd.github.v3+json" ^
-		                            https://api.github.com/repos/${GITHUB_REPO}/issues ^
-		                            -d @payload.json
-		                        """
-		                    }
-		                } else {
-		                    echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
-		                }
-		            }
-		        }
-		    }
-		}
-
-		// ✅ Move email notification OUTSIDE the script block
-		emailext (
-		    to: "${EMAIL_RECIPIENT}",
-		    subject: "📊 Dependency-Check Report: Security Analysis",
-		    body: """
-		    Attached is the full Dependency-Check security report.
-		    
-		    **Critical Issues Found:** ${criticalIssues.size()}
-		    
-		    **Pipeline Execution:** ${criticalIssues.size() > 0 ? '🚨 HALTED' : '✅ CONTINUING'}
-		    """,
-		    attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-		)
-		echo "✅ Email sent with full dependency-check report."
-
-		// ✅ Halt Pipeline if Critical Issues Exist
-		if (!criticalIssues.isEmpty()) {
-		    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-		} else {
-		    echo "✅ No critical issues found. Pipeline continuing."
-		}
+                }
+            }
+        }
 		stage('Build'){
 			steps{
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
