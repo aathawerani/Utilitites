@@ -57,10 +57,10 @@ pipeline {
                     def existingIssues = getExistingIssues()
                     for (issue in allIssues) {
 						echo "Got here 1"
-                    	echo "Creating issue: ${issueTitle}"
+                    	echo "Creating issue: '${issue.title}'"
                         if (!existingIssues.any { it.title == issue.title }) {
-                        	echo "Creating issue: ${issueTitle}"
-							echo "Issue body: ${issueBody}"
+                        	echo "Creating issue: '${issue.title}'"
+							echo "Issue body: '${issue.body}'"
                             withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                                 bat """
                                     "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
