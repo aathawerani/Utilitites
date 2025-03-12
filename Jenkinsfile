@@ -202,8 +202,9 @@ pipeline {
 	            def logFile = "${JENKINS_HOME}/jobs/${env.JOB_NAME}/builds/${env.BUILD_NUMBER}/log"
 	            if (fileExists(logFile)) {
 	                logs = readFile(logFile).split("\n").takeRight(50).join("\n")
-	            else
+	            } else {
 	            	logs = "log file not found"
+	            }
 
 	            echo "Pipeline failed in stage: ${failedStage}"
 
