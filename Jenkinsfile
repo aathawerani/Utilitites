@@ -57,6 +57,7 @@ pipeline {
                     def existingIssues = getExistingIssues()
                     for (issue in allIssues) {
 						echo "Got here 1"
+                    	echo "Creating issue: ${issueTitle}"
                         if (!existingIssues.any { it.title == issue.title }) {
                         	echo "Creating issue: ${issueTitle}"
 							echo "Issue body: ${issueBody}"
