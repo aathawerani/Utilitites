@@ -19,7 +19,8 @@ pipeline {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
                 dependencyCheckPublisher(
 				    pattern: '**/dependency-check-report/dependency-check-report.xml',
-				    failedTotalCritical: 1//,  // Pipeline fails if at least 1 Critical issue exists
+				    failedTotalCritical: 1,  // Pipeline fails if at least 1 Critical issue exists
+				    unstableTotalCritical: 1
 				    //failedTotalHigh: 3,      // Pipeline fails if 3+ High issues exist
 				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
 				)
