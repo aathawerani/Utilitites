@@ -58,9 +58,7 @@ pipeline {
                             def issueTitle = "[${vuln.severity}] ${vuln.name}"
                             def issueBody = "${vuln.name}: ${vuln.description}"
                             allIssues.add([title: issueTitle, body: issueBody])
-    		                echo "checking critical."
                             if (vuln.severity?.trim().toLowerCase() == "critical") {
-    		                	echo "adding critical."
 		                        criticalIssues.add(issueTitle + ": " + issueBody)
 		                    }
                         }
@@ -93,19 +91,18 @@ pipeline {
 					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
 					    }
 					}
-
+		            if (!criticalIssues.isEmpty()) {
+						emailext (
+			                to: "${EMAIL_RECIPIENT}",
+			                subject: "📊 Dependency-Check Report: Security Analysis",
+			                body: "Attached is the full Dependency-Check security report.}",
+			                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
+			            )
+					    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
+					} else {
+		                echo "No critical issues found. Pipeline continuing."
+		            }
                 }
-				emailext (
-	                to: "${EMAIL_RECIPIENT}",
-	                subject: "📊 Dependency-Check Report: Security Analysis",
-	                body: "Attached is the full Dependency-Check security report.}",
-	                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-	            )
-	            if (!criticalIssues.isEmpty()) {
-				    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-				} else {
-	                echo "No critical issues found. Pipeline continuing."
-	            }
             }
         }
 		stage('Build'){
