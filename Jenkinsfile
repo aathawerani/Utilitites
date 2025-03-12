@@ -8,6 +8,20 @@ pipeline {
         GITHUB_TOKEN = credentials('github-token')
         EMAIL_RECIPIENT = 'athawerani@gmail.com'
     }
+    def doesIssueExist(issueTitle) {
+	    def response = bat(
+	        script: """
+	            "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
+	                 -H "Accept: application/vnd.github.v3+json" ^
+	                 https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
+	        """,
+	        returnStdout: true
+	    ).trim()
+	    
+	    def issues = readJSON text: response
+	    return issues.any { it.title == issueTitle }
+	}
+
 	stages{
 		stage('Checkout'){
 			steps{
@@ -47,21 +61,6 @@ pipeline {
                             body: "The following critical vulnerabilities were found:\n\n" + criticalIssues.join("\n")
                         )
                     }
-
-                    def doesIssueExist(issueTitle) {
-		                def response = bat(
-		                    script: """
-		                        "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
-		                             -H "Accept: application/vnd.github.v3+json" ^
-		                             https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
-		                    """,
-		                    returnStdout: true
-		                ).trim()
-		                
-		                def issues = readJSON text: response
-		                return issues.any { it.title == issueTitle }
-		            }
-
                     // Create GitHub Issues for all vulnerabilities
                     for (issue in allIssues) {
                         def issueTitle = issue.split(":")[0]
