@@ -22,6 +22,8 @@ pipeline {
 		stage('Process Dependency-Check Results') {
             steps {
                 script {
+                    def reportFile = 'dependency-check-report/dependency-check-report.json'
+                    
                     def doesIssueExist = { issueTitle ->
                         def response = bat(
                             script: """
@@ -36,7 +38,6 @@ pipeline {
                         return issues.any { it.title == issueTitle }
                     }
 
-                    def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
 
                     // Parse JSON report
