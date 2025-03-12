@@ -16,7 +16,13 @@ pipeline {
 		}
 		stage('Dependency Check') {
             steps {
-                bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+                bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+                dependencyCheckPublisher(
+				    pattern: '**/dependency-check-report/dependency-check-report.json',
+				    failedTotalCritical: 1//,  // Pipeline fails if at least 1 Critical issue exists
+				    //failedTotalHigh: 3,      // Pipeline fails if 3+ High issues exist
+				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
+				)
             }
         }
 		stage('Process Dependency-Check Results') {
@@ -110,8 +116,8 @@ pipeline {
 				    )
 				    echo "✅ Email sent with embedded HTML Dependency-Check report."
 		            if (!criticalIssues.isEmpty()) {
-					    error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					    //echo "Critical issues found. Pipeline continuing for testing."
+					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
+					    echo "Critical issues found. Pipeline continuing for testing."
 					} else {
 		                echo "No critical issues found. Pipeline continuing."
 		            }
@@ -174,4 +180,37 @@ pipeline {
 		    }
 		}
 	}
+	post {
+        failure {
+            script {
+                def failedStage = ''
+                def logs = ''
+
+                // ✅ Detect the failed stage
+                for (stage in currentBuild.rawBuild.getActions(hudson.model.ErrorAction)) {
+                    failedStage = stage.displayName
+                    break // Stop after the first failed stage
+                }
+
+                // ✅ Get the last 50 lines of Jenkins logs
+                logs = currentBuild.rawBuild.getLog(50).join('\n')
+
+                echo "🚨 Pipeline failed in stage: ${failedStage}"
+
+                mail(
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "🚨 Jenkins Pipeline Failed in Stage: ${failedStage}",
+                    body: """<html>
+                    <body>
+                    <h2>⚠️ Jenkins Pipeline Failure Notification</h2>
+                    <p><b>Failed Stage:</b> ${failedStage}</p>
+                    <p><b>Error Logs:</b></p>
+                    <pre>${logs}</pre>
+                    <p>Please check the Jenkins logs for more details.</p>
+                    </body></html>""",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
 }
