@@ -22,13 +22,11 @@ pipeline {
 		stage('Process Dependency-Check Results') {
             steps {
                 script {
-                    echo "Parsing file."
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
 
                     // Parse JSON report
                     def jsonReport = readJSON file: reportFile
-                    echo "File parsed."
 
                     def getExistingIssues = { ->
                         def response = bat(
@@ -43,9 +41,7 @@ pipeline {
 						response = response.substring(response.indexOf("["))
                         echo "GitHub API Response: ${response}" 
 
-                    	echo "Parsing response."
                         def issues = readJSON text: response
-                    	echo "Response parsed."
                         return issues
                     }
 
@@ -59,10 +55,10 @@ pipeline {
 
                     // ✅ Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
-                	echo "Got here 1."
                     for (issue in allIssues) {
-                		echo "Got here 2."
                         if (!existingIssues.any { it.title == issue.title }) {
+                        	echo "Creating issue: ${issueTitle}"
+							echo "Issue body: ${issueBody}"
                             withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                                 bat """
                                     "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
