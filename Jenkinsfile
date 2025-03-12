@@ -94,27 +94,19 @@ pipeline {
 					    }
 					}
 
-					emailext (
-		                to: "${EMAIL_RECIPIENT}",
-		                subject: "📊 Dependency-Check Report: Security Analysis",
-		                body: "Attached is the full Dependency-Check security report.\n\nCritical Issues: ${criticalIssues.size()}\n\nPipeline execution: ${criticalIssues.size() > 0 ? 'HALTED 🚨' : 'CONTINUING ✅'}",
-		                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-		            )
-		            echo "Email sent with full dependency-check report."
-
 		            if (!criticalIssues.isEmpty()) {
 					    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
 					} else {
 		                echo "No critical issues found. Pipeline continuing."
 		            }
                 }
+				emailext (
+	                to: "${EMAIL_RECIPIENT}",
+	                subject: "📊 Dependency-Check Report: Security Analysis",
+	                body: "Attached is the full Dependency-Check security report.}",
+	                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
+	            )
             }
-			emailext (
-                to: "${EMAIL_RECIPIENT}",
-                subject: "📊 Dependency-Check Report: Security Analysis",
-                body: "Attached is the full Dependency-Check security report.}",
-                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-            )
         }
 		stage('Build'){
 			steps{
