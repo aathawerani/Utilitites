@@ -55,25 +55,31 @@ pipeline {
 
                     // ✅ Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
-                    for (issue in allIssues) {
-						echo "Got here 1"
-                    	echo "Creating issue: '${issue.title}'"
-                        if (!existingIssues.any { it.title == issue.title }) {
-                        	echo "Creating issue: '${issue.title}'"
-							echo "Issue body: '${issue.body}'"
-                            withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                                bat """
-                                    "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
-                                    -H "Accept: application/vnd.github.v3+json" ^
-                                    https://api.github.com/repos/${GITHUB_REPO}/issues ^
-                                    -d "{\\"title\\": \\"${issue.title}\\", \\"body\\": \\"${issue.body}\\", \\"labels\\": [\\"security\\"]}"
-                                """
-                            }
-                        } else {
-                            echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
-                        }
-                    }
-					echo "stage complete"
+					for (issue in allIssues) {
+					    if (!existingIssues.any { it.title == issue.title }) {
+					        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+					            // ✅ Write JSON payload to a file
+					            def jsonPayload = """
+					            {
+					                "title": "${issue.title}",
+					                "body": "${issue.body.replace('"', '\\"')}",
+					                "labels": ["security"]
+					            }
+					            """
+					            writeFile file: "payload.json", text: jsonPayload
+
+					            // ✅ Use `-d @payload.json` instead of inline JSON
+					            bat """
+					                "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+					                -H "Accept: application/vnd.github.v3+json" ^
+					                https://api.github.com/repos/${GITHUB_REPO}/issues ^
+					                -d @payload.json
+					            """
+					        }
+					    } else {
+					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
+					    }
+					}
                 }
             }
         }
