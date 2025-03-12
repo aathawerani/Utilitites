@@ -62,7 +62,7 @@ pipeline {
                 	echo "Got here 1."
                     for (issue in allIssues) {
                 		echo "Got here 2."
-                        if (!existingIssues.any { it.title == issueTitle }) {
+                        if (!existingIssues.any { it.title == issue.title }) {
                             withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                                 bat """
                                     "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
