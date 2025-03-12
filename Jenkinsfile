@@ -81,23 +81,23 @@ pipeline {
 		                    echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
 		                }
 		            }
+
+			        // ✅ Move emailext outside script block
+			        emailext (
+			            to: "${EMAIL_RECIPIENT}",
+			            subject: "📊 Dependency-Check Report: Security Analysis",
+			            body: "Attached is the full Dependency-Check security report.\n\nCritical Issues: ${criticalIssues.size()}\n\nPipeline execution: ${criticalIssues.size() > 0 ? 'HALTED 🚨' : 'CONTINUING ✅'}",
+			            attachmentsPattern: "dependency-check-report/dependency-check-report.json"
+			        )
+			        echo "Email sent with full dependency-check report."
+
+			        // ✅ Halt Pipeline if Critical Issues Exist
+			        if (criticalIssues.size() > 0) {
+			            error "Pipeline halted due to critical security vulnerabilities."
+			        } else {
+			            echo "No critical issues found. Pipeline continuing."
+			        }
 		        } // ✅ Close script block before emailext
-
-		        // ✅ Move emailext outside script block
-		        emailext (
-		            to: "${EMAIL_RECIPIENT}",
-		            subject: "📊 Dependency-Check Report: Security Analysis",
-		            body: "Attached is the full Dependency-Check security report.\n\nCritical Issues: ${criticalIssues.size()}\n\nPipeline execution: ${criticalIssues.size() > 0 ? 'HALTED 🚨' : 'CONTINUING ✅'}",
-		            attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-		        )
-		        echo "Email sent with full dependency-check report."
-
-		        // ✅ Halt Pipeline if Critical Issues Exist
-		        if (criticalIssues.size() > 0) {
-		            error "Pipeline halted due to critical security vulnerabilities."
-		        } else {
-		            echo "No critical issues found. Pipeline continuing."
-		        }
 		    }
 		}
 		stage('Build'){
