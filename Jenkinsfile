@@ -91,6 +91,11 @@ pipeline {
 					        echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
 					    }
 					}
+					 mail(
+				        to: "${EMAIL_RECIPIENT}",
+				        subject: "📊 Dependency-Check Report",
+				        body: "Attached is the full Dependency-Check security report.\n\nCheck Jenkins logs for more details."
+				    )
 		            if (!criticalIssues.isEmpty()) {
 					    //error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
 					    echo "Critical issues found. Pipeline continuing for testing."
@@ -98,12 +103,6 @@ pipeline {
 		                echo "No critical issues found. Pipeline continuing."
 		            }
                 }
-				emailext (
-	                to: "${EMAIL_RECIPIENT}",
-	                subject: "📊 Dependency-Check Report: Security Analysis",
-	                body: "Attached is the full Dependency-Check security report.}",
-	                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
-	            )
             }
         }
 		stage('Build'){
