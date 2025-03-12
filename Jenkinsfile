@@ -198,10 +198,9 @@ pipeline {
 	    failure {
 	        script {
 	            def logs = ''
-
 	            // ✅ Get the last 50 lines of logs (without using `getRawBuild()`)
 	            try {
-	                logs = currentBuild.rawBuild.getLog(50).join('\n')
+	                logs = currentBuild.getLog(50).join('\n')
 	            } catch (Exception e) {
 	                logs = "Failed to retrieve logs."
 	            }
