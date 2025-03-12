@@ -94,11 +94,6 @@ pipeline {
 					    }
 					}
 
-		            if (!criticalIssues.isEmpty()) {
-					    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					} else {
-		                echo "No critical issues found. Pipeline continuing."
-		            }
                 }
 				emailext (
 	                to: "${EMAIL_RECIPIENT}",
@@ -106,6 +101,11 @@ pipeline {
 	                body: "Attached is the full Dependency-Check security report.}",
 	                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
 	            )
+	            if (!criticalIssues.isEmpty()) {
+				    error "🚨 Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
+				} else {
+	                echo "No critical issues found. Pipeline continuing."
+	            }
             }
         }
 		stage('Build'){
