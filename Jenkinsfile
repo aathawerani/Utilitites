@@ -197,13 +197,13 @@ pipeline {
 	post {
 	    failure {
 	        script {
+
 	            def logs = ''
-	            // ✅ Get the last 50 lines of logs (without using `getRawBuild()`)
-	            try {
-	                logs = run.getLog(50).join('\n')
-	            } catch (Exception e) {
-	                logs = "Failed to retrieve logs."
-	            }
+	            def logFile = "${JENKINS_HOME}/jobs/${env.JOB_NAME}/builds/${env.BUILD_NUMBER}/log"
+	            if (fileExists(logFile)) {
+	                logs = readFile(logFile).split("\n").takeRight(50).join("\n")
+	            else
+	            	logs = "log file not found"
 
 	            echo "Pipeline failed in stage: ${failedStage}"
 
