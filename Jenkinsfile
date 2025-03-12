@@ -34,55 +34,53 @@ pipeline {
             }
         }
 		stage('Process Dependency-Check Results') {
-		            steps {
-		                script {
-		                    def doesIssueExist = { issueTitle ->
-		                        def response = bat(
-		                            script: """
-		                                "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
-		                                     -H "Accept: application/vnd.github.v3+json" ^
-		                                     https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
-		                            """,
-		                            returnStdout: true
-		                        ).trim()
+            steps {
+                script {
+                    def doesIssueExist = { issueTitle ->
+                        def response = bat(
+                            script: """
+                                "D:\\DevOps\\curl\\bin\\curl.exe" -s -X GET -H "Authorization: token %GITHUB_TOKEN%" ^
+                                     -H "Accept: application/vnd.github.v3+json" ^
+                                     https://api.github.com/repos/${GITHUB_REPO}/issues?state=open
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-		                        def issues = readJSON text: response
-		                        return issues.any { it.title == issueTitle }
-		                    }
+                        def issues = readJSON text: response
+                        return issues.any { it.title == issueTitle }
+                    }
 
-		                    def reportFile = 'dependency-check-report/dependency-check-report.json'
-		                    def allIssues = []
+                    def reportFile = 'dependency-check-report/dependency-check-report.json'
+                    def allIssues = []
 
-		                    // Parse JSON report
-		                    def jsonReport = readJSON file: reportFile
-		                    for (dep in jsonReport.dependencies) {
-		                        for (vuln in dep.vulnerabilities) {
-		                            def issueTitle = "[${vuln.severity}] ${vuln.name}"
-		                            def issueBody = "${vuln.name}: ${vuln.description}"
-		                            allIssues.add([title: issueTitle, body: issueBody])
-		                        }
-		                    }
+                    // Parse JSON report
+                    def jsonReport = readJSON file: reportFile
+                    for (dep in jsonReport.dependencies) {
+                        for (vuln in dep.vulnerabilities) {
+                            def issueTitle = "[${vuln.severity}] ${vuln.name}"
+                            def issueBody = "${vuln.name}: ${vuln.description}"
+                            allIssues.add([title: issueTitle, body: issueBody])
+                        }
+                    }
 
-		                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
-		                    for (issue in allIssues) {
-		                        if (!doesIssueExist(issue.title)) {
-		                            withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-		                                bat """
-		                                    "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
-		                                    -H "Accept: application/vnd.github.v3+json" ^
-		                                    https://api.github.com/repos/${GITHUB_REPO}/issues ^
-		                                    -d "{\\"title\\": \\"${issue.title}\\", \\"body\\": \\"${issue.body}\\", \\"labels\\": [\\"security\\"]}"
-		                                """
-		                            }
-		                        } else {
-		                            echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
-		                        }
-		                    }
-		                }
-		            }
-		        }
-		    }
-		}		
+                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
+                    for (issue in allIssues) {
+                        if (!doesIssueExist(issue.title)) {
+                            withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                                bat """
+                                    "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+                                    -H "Accept: application/vnd.github.v3+json" ^
+                                    https://api.github.com/repos/${GITHUB_REPO}/issues ^
+                                    -d "{\\"title\\": \\"${issue.title}\\", \\"body\\": \\"${issue.body}\\", \\"labels\\": [\\"security\\"]}"
+                                """
+                            }
+                        } else {
+                            echo "Issue '${issue.title}' already exists in GitHub. Skipping creation."
+                        }
+                    }
+                }
+            }
+        }
 		stage('Build'){
 			steps{
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
