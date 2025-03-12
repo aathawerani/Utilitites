@@ -59,7 +59,7 @@ pipeline {
                             def issueBody = "${vuln.name}: ${vuln.description}"
                             allIssues.add([title: issueTitle, body: issueBody])
     		                echo "checking critical."
-                            if (vuln.severity == "Critical") {
+                            if (vuln.severity?.trim().toLowerCase() == "critical") {
     		                	echo "adding critical."
 		                        criticalIssues.add(issueTitle + ": " + issueBody)
 		                    }
@@ -109,6 +109,12 @@ pipeline {
 		            }
                 }
             }
+			emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "📊 Dependency-Check Report: Security Analysis",
+                body: "Attached is the full Dependency-Check security report.}",
+                attachmentsPattern: "dependency-check-report/dependency-check-report.json"
+            )
         }
 		stage('Build'){
 			steps{
