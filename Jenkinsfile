@@ -167,21 +167,27 @@ pipeline {
 		            
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
-		                def maxAttempts = 2 // Maximum number of checks (adjust as needed)
+		                def maxAttempts = 2 // Maximum retries
 		                def attempt = 0
 
 		                while (attempt < maxAttempts) {
-		                    def response = bat(returnStdout: true, script: 'curl -u %SONAR_AUTH_TOKEN% "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"').trim()
+		                    def response = powershell(returnStdout: true, script: '''
+		                        $sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        $authHeader = @{ Authorization = "Basic $([Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${env:SONARQUBE_TOKEN}:"))) }
+		                        $result = Invoke-RestMethod -Uri $sonarUrl -Headers $authHeader -Method Get
+		                        $result | ConvertTo-Json -Compress
+		                    ''').trim()
+
 		                    echo response
-		                    
+
 		                    def jsonResponse = readJSON(text: response)
 		                    sonarStatus = jsonResponse.status
-		                    
+
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        break
 		                    }
-		                    
-		                    sleep 2 // Wait 10 seconds before next check
+
+		                    sleep 2 // Wait 10 seconds before retrying
 		                    attempt++
 		                }
 
