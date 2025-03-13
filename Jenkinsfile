@@ -203,14 +203,47 @@ pipeline {
                 mimeType: 'text/html'
             )
         }
-        failure {
-            emailext (
-                to: "${EMAIL_RECIPIENT}",
-                subject: "FAILURE: ${currentBuild.fullDisplayName}",
-                body: "Unfortunately, the build ${currentBuild.fullDisplayName} failed. Please review the details at ${env.BUILD_URL}.",
-                mimeType: 'text/html'
-            )
-        }
+		failure {
+		    script {
+		        echo "Jenkins Pipeline Failed! Sending email notification."
+
+		        def buildStatus = currentBuild.result ?: "FAILED" // Get build status
+		        def failedStageMessage = "Pipeline failed at stage: ${failedStage}" // Track failed stage
+		        def buildDuration = currentBuild.durationString // Get build duration
+		        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC')) // Timestamp
+
+		        // Capture last 50 lines of console log for debugging
+		        def logSnippet = ""
+		        try {
+		            logSnippet = currentBuild.rawBuild.getLog(50).join("\n")
+		        } catch (Exception e) {
+		            logSnippet = "Could not retrieve logs."
+		        }
+
+		        emailext (
+		            to: "${EMAIL_RECIPIENT}",
+		            subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+		            body: """
+		            <html>
+		            <body>
+		            <h2>Jenkins Pipeline Failure Notification</h2>
+		            <p><strong>Build Status:</strong> ${buildStatus}</p>
+		            <p><strong>Failed Stage:</strong> ${failedStage}</p>
+		            <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+		            <p><strong>Build Duration:</strong> ${buildDuration}</p>
+		            <p><strong>Timestamp (UTC):</strong> ${timestamp}</p>
+		            <p><strong>Job:</strong> <a href="${env.BUILD_URL}">${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+		            
+		            <h3>Last 50 Lines of Console Log:</h3>
+		            <pre>${logSnippet}</pre>
+
+		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for more details.</p>
+		            </body></html>
+		            """,
+		            mimeType: 'text/html'
+		        )
+		    }
+		}
         unstable {
             emailext (
                 to: "${EMAIL_RECIPIENT}",
