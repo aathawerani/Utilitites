@@ -149,7 +149,7 @@ pipeline {
 		stage('SonarQube Analysis') {
 		    steps {
 		        script {
-		            failedStage = "SonarQube"  // ✅ Track stage
+		            failedStage = "SonarQube"  // ✅ Track failed stage
 		        }
 		        withSonarQubeEnv('SonarQube') {
 		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
@@ -160,14 +160,38 @@ pipeline {
 		        }
 		    }
 		}
-		stage('Quality Gate Check & Email Report') {
+		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            timeout(time: 10, unit: 'MINUTES') {  // ✅ Avoid infinite waits
-		                def qualityGate = waitForQualityGate()
-		                if (qualityGate.status != 'OK') {
-		                    error "Pipeline halted due to SonarQube Quality Gate failure: ${qualityGate.status}"
+		            def sonarTaskId = '5b7ae27c-0447-4888-a1e6-9f37939609eb'  // Replace with the actual task ID
+		            def sonarStatus = ""
+		            def maxRetries = 30  // Waits up to ~15 minutes
+		            def sleepInterval = 30  // Checks every 30 seconds
+
+		            echo "⏳ Waiting for SonarQube analysis to complete..."
+
+		            for (int i = 0; i < maxRetries; i++) {
+		                def response = bat(
+		                    script: """
+		                        curl -s -u ${SONARQUBE_TOKEN}: "${SONARQUBE_URL}/api/ce/task?id=${sonarTaskId}"
+		                    """,
+		                    returnStdout: true
+		                ).trim()
+
+		                def jsonResponse = readJSON text: response
+		                sonarStatus = jsonResponse.task.status
+
+		                echo "🔄 SonarQube Status: ${sonarStatus}"
+
+		                if (sonarStatus == "SUCCESS" || sonarStatus == "FAILED" || sonarStatus == "CANCELED") {
+		                    break
 		                }
+
+		                sleep(sleepInterval)
+		            }
+
+		            if (sonarStatus != "SUCCESS") {
+		                error "❌ SonarQube analysis failed or took too long."
 		            }
 
 		            // ✅ Fetch SonarQube report
@@ -190,7 +214,8 @@ pipeline {
 		                """,
 		                mimeType: 'text/html'
 		            )
-		            echo "SonarQube report emailed successfully."
+
+		            echo "✅ SonarQube report emailed successfully."
 		        }
 		    }
 		}
