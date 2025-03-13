@@ -171,12 +171,13 @@ pipeline {
 		                def attempt = 0
 
 		                while (attempt < maxAttempts) {
-		                    def response = powershell(returnStdout: true, script: '''
-		                        $sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
-		                        $authHeader = @{ Authorization = "Basic $([Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${env:SONARQUBE_TOKEN}:"))) }
-		                        $result = Invoke-RestMethod -Uri $sonarUrl -Headers $authHeader -Method Get
-		                        $result | ConvertTo-Json -Compress
-		                    ''').trim()
+		                    def response = powershell(returnStdout: true, script: """
+		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("\$env:SONARQUBE_TOKEN`:`"))
+		                        \$authHeader = @{ Authorization = "Basic \$encodedToken" }
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$authHeader -Method Get
+		                        \$result | ConvertTo-Json -Compress
+		                    """).trim()
 
 		                    echo response
 
