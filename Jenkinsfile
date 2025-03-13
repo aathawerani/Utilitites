@@ -172,18 +172,20 @@ pipeline {
 
 		                while (attempt < maxAttempts) {
 		                    def response = powershell(returnStdout: true, script: """
-                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
-                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
-                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
-                        \$headers = @{ Authorization = "Basic \$encodedToken" }
-                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
-                        \$result | ConvertTo-Json -Compress
-                    """).trim()
+		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
+		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
+		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
+		                        \$result | ConvertTo-Json -Compress
+		                    """).trim()
 
 		                    echo response
 
 		                    def jsonResponse = readJSON(text: response)
+		                    echo jsonResponse
 		                    sonarStatus = jsonResponse.status
+		                    echo sonarStatus
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        break
