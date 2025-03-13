@@ -195,24 +195,29 @@ pipeline {
 		}
 	}
 	post {
+        success {
+            emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "SUCCESS: ${currentBuild.fullDisplayName}",
+                body: "Good news! The build ${currentBuild.fullDisplayName} succeeded. Check it out at ${env.BUILD_URL}.",
+                mimeType: 'text/html'
+            )
+        }
         failure {
-            script {
-
-                echo "Jenkins Pipeline Failed! Sending email notification."
-
-                emailext (
-                    to: "${EMAIL_RECIPIENT}",
-                    subject: "Jenkins Pipeline Failed",
-                    body: """
-                    <html>
-                    <body>
-                    <h2>Jenkins Pipeline Failure Notification</h2>
-                    <p>Please check the Jenkins logs for more details.</p>
-                    </body></html>
-                    """,
-                    mimeType: 'text/html'
-                )
-            }
+            emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "FAILURE: ${currentBuild.fullDisplayName}",
+                body: "Unfortunately, the build ${currentBuild.fullDisplayName} failed. Please review the details at ${env.BUILD_URL}.",
+                mimeType: 'text/html'
+            )
+        }
+        unstable {
+            emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "UNSTABLE: ${currentBuild.fullDisplayName}",
+                body: "The build ${currentBuild.fullDisplayName} is unstable. Please check the results at ${env.BUILD_URL}.",
+                mimeType: 'text/html'
+            )
         }
     }
 }
