@@ -21,6 +21,10 @@ pipeline {
 		stage('Dependency Check') {
             steps {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
+			}
+		}
+		stage('Dependency Check Report') {
+            steps {
                 dependencyCheckPublisher( //not working in my case
 				    pattern: '**/dependency-check-report/dependency-check-report.xml',
 				    failedTotalCritical: 1,  // Pipeline fails if at least 1 Critical issue exists
@@ -29,7 +33,7 @@ pipeline {
 				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
 				)
                 script {
-            		failedStage = "Dependency Check"  // ✅ Set stage name
+            		failedStage = "Dependency Check Report"  // ✅ Set stage name
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
                     def criticalIssues = [] 
@@ -212,15 +216,6 @@ pipeline {
 		        def buildDuration = currentBuild.durationString
 		        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC'))
 
-		        // Fetch last 50 lines of logs
-		        def logSnippet = ""
-		        try {
-		            def logLines = currentBuild.rawBuild.log.readLines() // Fetch full logs
-		            logSnippet = logLines.takeRight(50).join("\n") // Get last 50 lines
-		        } catch (Exception e) {
-		            logSnippet = "Could not retrieve logs: ${e.message}"
-		        }
-
 		        emailext (
 		            to: "${EMAIL_RECIPIENT}",
 		            subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -235,9 +230,6 @@ pipeline {
 		            <p><strong>Timestamp (UTC):</strong> ${timestamp}</p>
 		            <p><strong>Job:</strong> <a href="${env.BUILD_URL}">${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
 		            
-		            <h3>Last 50 Lines of Console Log:</h3>
-		            <pre>${logSnippet}</pre>
-
 		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for full details.</p>
 		            </body></html>
 		            """,
