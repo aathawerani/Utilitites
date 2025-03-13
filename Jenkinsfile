@@ -207,21 +207,23 @@ pipeline {
 		    script {
 		        echo "Jenkins Pipeline Failed! Sending email notification."
 
-		        def buildStatus = currentBuild.result ?: "FAILED" // Get build status
-		        def failedStageMessage = "Pipeline failed at stage: ${failedStage}" // Track failed stage
-		        def buildDuration = currentBuild.durationString // Get build duration
-		        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC')) // Timestamp
+		        def buildStatus = currentBuild.result ?: "FAILED"
+		        def failedStageMessage = "Pipeline failed at stage: ${failedStage}"
+		        def buildDuration = currentBuild.durationString
+		        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC'))
 
-		        // Capture last 50 lines of console log for debugging
+		        // Fetch last 50 lines from Jenkins logs
 		        def logSnippet = ""
 		        try {
-		            logSnippet = manager.build.logFile.text.readLines().takeRight(50).join("\n")
+		            def logLines = currentBuild.getRawBuild().getLog(Integer.MAX_VALUE) // Get full log
+		            logSnippet = logLines.takeRight(50).join("\n") // Get last 50 lines
 		        } catch (Exception e) {
-		            logSnippet = "Could not retrieve logs."
+		            logSnippet = "Could not retrieve logs: ${e.message}"
 		        }
 
 		        emailext (
 		            to: "${EMAIL_RECIPIENT}",
+		            subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
 		            body: """
 		            <html>
 		            <body>
@@ -236,7 +238,7 @@ pipeline {
 		            <h3>Last 50 Lines of Console Log:</h3>
 		            <pre>${logSnippet}</pre>
 
-		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for more details.</p>
+		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for full details.</p>
 		            </body></html>
 		            """,
 		            mimeType: 'text/html'
