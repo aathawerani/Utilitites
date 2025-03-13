@@ -19,10 +19,10 @@ pipeline {
 			}
 		}
 		stage('Dependency Check') {
-            script {
-        		failedStage = "Dependency Check"  // ✅ Set stage name
-        	}
             steps {
+	            script {
+	        		failedStage = "Dependency Check"  // ✅ Set stage name
+	        	}
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
 			}
 		}
