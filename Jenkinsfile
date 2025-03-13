@@ -180,12 +180,16 @@ pipeline {
 		                        \$result | ConvertTo-Json -Compress
 		                    """).trim()
 
-		                    echo response
+		                    echo "SonarQube API Response: ${response}"
 
-		                    def jsonResponse = readJSON(text: response)
-		                    echo jsonResponse
-		                    sonarStatus = jsonResponse.status
-		                    echo sonarStatus
+		                    try {
+		                        def jsonResponse = readJSON(text: response)
+		                        echo jsonResponse
+		                        sonarStatus = jsonResponse.projectStatus.status
+		                        echo sonarStatus
+		                    } catch (Exception e) {
+		                        error "❌ Failed to parse SonarQube API response: ${e.message}"
+		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        break
