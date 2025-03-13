@@ -197,26 +197,16 @@ pipeline {
 	post {
         failure {
             script {
-                def logFile = "${JENKINS_HOME}/jobs/${env.JOB_NAME}/builds/${env.BUILD_NUMBER}/log"
-                def logs = "Failed to retrieve logs."
-
-                if (fileExists(logFile)) {
-                    logs = readFile(logFile).split("\n").takeRight(50).join("\n")
-                }
 
                 echo "Jenkins Pipeline Failed! Sending email notification."
 
                 emailext (
                     to: "${EMAIL_RECIPIENT}",
-                    subject: "Jenkins Pipeline Failed in Job: ${env.JOB_NAME}",
+                    subject: "Jenkins Pipeline Failed",
                     body: """
                     <html>
                     <body>
                     <h2>Jenkins Pipeline Failure Notification</h2>
-                    <p><b>Job:</b> ${env.JOB_NAME}</p>
-                    <p><b>Build #:</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Error Logs:</b></p>
-                    <pre>${logs}</pre>
                     <p>Please check the Jenkins logs for more details.</p>
                     </body></html>
                     """,
