@@ -194,4 +194,25 @@ pipeline {
 		    }
 		}
 	}
+	post {
+        failure {
+            script {
+
+                echo "Jenkins Pipeline Failed! Sending email notification."
+
+                emailext (
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Pipeline Failed",
+                    body: """
+                    <html>
+                    <body>
+                    <h2>Jenkins Pipeline Failure Notification</h2>
+                    <p>Please check the Jenkins logs for more details.</p>
+                    </body></html>
+                    """,
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
 }
