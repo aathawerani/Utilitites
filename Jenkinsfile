@@ -215,14 +215,13 @@ pipeline {
 		        // Capture last 50 lines of console log for debugging
 		        def logSnippet = ""
 		        try {
-		            logSnippet = currentBuild.rawBuild.getLog(50).join("\n")
+		            logSnippet = manager.build.logFile.text.readLines().takeRight(50).join("\n")
 		        } catch (Exception e) {
 		            logSnippet = "Could not retrieve logs."
 		        }
 
 		        emailext (
 		            to: "${EMAIL_RECIPIENT}",
-		            subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
 		            body: """
 		            <html>
 		            <body>
