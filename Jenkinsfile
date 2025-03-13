@@ -19,6 +19,9 @@ pipeline {
 			}
 		}
 		stage('Dependency Check') {
+            script {
+        		failedStage = "Dependency Check"  // ✅ Set stage name
+        	}
             steps {
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
 			}
@@ -121,7 +124,7 @@ pipeline {
 				                </body></html>""",
 				                mimeType: 'text/html'
 					    )
-					    echo "✅ Email sent with embedded HTML Dependency-Check report."
+					    echo "Email sent with embedded HTML Dependency-Check report."
 					}
 		            //if (!criticalIssues.isEmpty()) {
 					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
@@ -145,15 +148,49 @@ pipeline {
 		}
 		stage('SonarQube Analysis') {
 		    steps {
-				script {
-			    	failedStage = "SonarQube"  // ✅ Set stage name
-                }
+		        script {
+		            failedStage = "SonarQube"  // ✅ Track stage
+		        }
 		        withSonarQubeEnv('SonarQube') {
 		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
 		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
 		                bat 'dotnet build --configuration Release'
 		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
 		            }
+		        }
+		    }
+		}
+		stage('Quality Gate Check & Email Report') {
+		    steps {
+		        script {
+		            timeout(time: 10, unit: 'MINUTES') {  // ✅ Avoid infinite waits
+		                def qualityGate = waitForQualityGate()
+		                if (qualityGate.status != 'OK') {
+		                    error "Pipeline halted due to SonarQube Quality Gate failure: ${qualityGate.status}"
+		                }
+		            }
+
+		            // ✅ Fetch SonarQube report
+		            def sonarReportURL = "${SONARQUBE_URL}/dashboard?id=QR-code"
+
+		            // ✅ Send SonarQube Report via Email
+		            emailext (
+		                to: "${EMAIL_RECIPIENT}",
+		                subject: "SonarQube Report for ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+		                body: """
+		                <html>
+		                <body>
+		                    <h2>SonarQube Analysis Completed</h2>
+		                    <p><strong>Project:</strong> QR-code</p>
+		                    <p><strong>SonarQube Dashboard:</strong> <a href="${sonarReportURL}">${sonarReportURL}</a></p>
+		                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+		                    <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+		                </body>
+		                </html>
+		                """,
+		                mimeType: 'text/html'
+		            )
+		            echo "SonarQube report emailed successfully."
 		        }
 		    }
 		}
