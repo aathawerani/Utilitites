@@ -163,81 +163,40 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONARQUBE_TOKEN')]) {
-		                def sonarProjectKey = "QR-code"
-		                def sonarAPI = "http://localhost:9000/api/ce/component?component=${sonarProjectKey}"
-		                def maxRetries = 30
-		                def sleepInterval = 30
+		            echo "⏳ Waiting for SonarQube analysis to complete..."
+		            
+		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
+		                def maxAttempts = 30 // Maximum number of checks (adjust as needed)
+		                def attempt = 0
 
-		                echo "⏳ Fetching latest SonarQube Task ID..."
-		                
-		                def response = bat(
-		                    script: "curl -s -u %SONARQUBE_TOKEN%: ${sonarAPI}",
-		                    returnStdout: true
-		                ).trim()
-
-		                def jsonResponse = readJSON text: response
-
-		                // ✅ Ensure response contains tasks
-		                if (!jsonResponse.ce || !jsonResponse.ce.queue || jsonResponse.ce.queue.isEmpty()) {
-		                    error "❌ No SonarQube task found for project ${sonarProjectKey}"
-		                }
-
-		                def sonarTaskId = jsonResponse.ce.queue[0].id
-		                echo "✅ SonarQube Task ID: ${sonarTaskId}"
-
-		                echo "⏳ Waiting for SonarQube analysis to complete..."
-		                for (int i = 0; i < maxRetries; i++) {
-		                    def taskResponse = bat(
-		                        script: "curl -s -u %SONARQUBE_TOKEN%: \"http://localhost:9000/api/ce/task?id=${sonarTaskId}\"",
-		                        returnStdout: true
-		                    ).trim()
-
-		                    // ✅ Validate response before parsing
-		                    if (taskResponse == "" || taskResponse == null) {
-		                        echo "⚠️ Empty response from SonarQube. Retrying..."
-		                        sleep(sleepInterval)
-		                        continue
-		                    }
-
-		                    def taskJson = readJSON text: taskResponse
-		                    sonarStatus = taskJson.task.status
-		                    echo "🔄 SonarQube Status: ${sonarStatus}"
-
-		                    if (sonarStatus == "SUCCESS" || sonarStatus == "FAILED" || sonarStatus == "CANCELED") {
+		                while (attempt < maxAttempts) {
+		                    def response = bat(returnStdout: true, script: 'curl -u %SONAR_AUTH_TOKEN% "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"').trim()
+		                    
+		                    def jsonResponse = readJSON(text: response)
+		                    sonarStatus = jsonResponse.status
+		                    
+		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        break
 		                    }
-
-		                    sleep(sleepInterval)
+		                    
+		                    sleep 10 // Wait 10 seconds before next check
+		                    attempt++
 		                }
 
-		                if (sonarStatus != "SUCCESS") {
-		                    error "❌ SonarQube analysis failed or took too long."
+		                if (sonarStatus == "ERROR") {
+		                    error "❌ SonarQube analysis failed! Quality gate not passed."
 		                }
 
-		                // ✅ Generate SonarQube Report Link
-		                def sonarReportURL = "http://localhost:9000/dashboard?id=${sonarProjectKey}"
+		                echo "✅ SonarQube analysis completed successfully."
 
-		                // ✅ Send Email with SonarQube Report
-		                emailext (
-		                    to: "athawerani@gmail.com",
-		                    subject: "SonarQube Report for ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-		                    body: """
-		                    <html>
-		                    <body>
-		                        <h2>SonarQube Analysis Completed</h2>
-		                        <p><strong>Project:</strong> ${sonarProjectKey}</p>
-		                        <p><strong>SonarQube Dashboard:</strong> <a href="${sonarReportURL}">${sonarReportURL}</a></p>
-		                        <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
-		                        <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
-		                    </body>
-		                    </html>
-		                    """,
-		                    mimeType: 'text/html'
+		                // Email Report
+		                emailext(
+		                    to: 'athawerani@gmail.com',
+		                    subject: "SonarQube Report for QR-code",
+		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+		                    attachLog: true
 		                )
-
-		                echo "✅ SonarQube report emailed successfully."
 		            }
 		        }
 		    }
