@@ -20,6 +20,9 @@ pipeline {
 		}
 		stage('Dependency Check') {
             steps {
+	            script {
+	        		failedStage = "Dependency Check"  // ✅ Set stage name
+	        	}
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
 			}
 		}
@@ -121,7 +124,7 @@ pipeline {
 				                </body></html>""",
 				                mimeType: 'text/html'
 					    )
-					    echo "✅ Email sent with embedded HTML Dependency-Check report."
+					    echo "Email sent with embedded HTML Dependency-Check report."
 					}
 		            //if (!criticalIssues.isEmpty()) {
 					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
@@ -145,14 +148,66 @@ pipeline {
 		}
 		stage('SonarQube Analysis') {
 		    steps {
-				script {
-			    	failedStage = "SonarQube"  // ✅ Set stage name
-                }
+		        script {
+		            failedStage = "SonarQube"
+		        }
 		        withSonarQubeEnv('SonarQube') {
 		            dir('GenerateQR/GenerateQR_v3/GenerateQR') {
 		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" begin /k:"QR-code" /d:sonar.host.url="http://localhost:9000" /d:sonar.login=%SONARQUBE_TOKEN%'
 		                bat 'dotnet build --configuration Release'
 		                bat '"C:\\Users\\ali.thawerani\\.dotnet\\tools\\dotnet-sonarscanner" end /d:sonar.login=%SONARQUBE_TOKEN%'
+		            }
+		        }
+		    }
+		}
+		stage('Wait for SonarQube & Email Report') {
+		    steps {
+		        script {
+		            echo "⏳ Waiting for SonarQube analysis to complete..."
+		            
+		            withSonarQubeEnv('SonarQube') {
+		                def sonarStatus = ""
+		                def maxAttempts = 2 // Maximum retries
+		                def attempt = 0
+
+		                while (attempt < maxAttempts) {
+		                    def response = powershell(returnStdout: true, script: """
+		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
+		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
+		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
+		                        \$result | ConvertTo-Json -Compress
+		                    """).trim()
+
+		                    echo response
+
+		                    def jsonResponse = readJSON(text: response)
+		                    echo jsonResponse
+		                    sonarStatus = jsonResponse.status
+		                    echo sonarStatus
+
+		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
+		                        break
+		                    }
+
+		                    sleep 2 // Wait 10 seconds before retrying
+		                    attempt++
+		                }
+
+		                if (sonarStatus == "ERROR") {
+		                    error "❌ SonarQube analysis failed! Quality gate not passed."
+		                }
+
+		                echo "✅ SonarQube analysis completed successfully."
+
+		                // Email Report
+		                emailext(
+		                    to: 'athawerani@gmail.com',
+		                    subject: "SonarQube Report for QR-code",
+		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+		                    attachLog: true
+		                )
 		            }
 		        }
 		    }
