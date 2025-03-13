@@ -212,10 +212,10 @@ pipeline {
 		        def buildDuration = currentBuild.durationString
 		        def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC'))
 
-		        // Safe way to fetch logs (Jenkins-approved)
+		        // Fetch last 50 lines of logs
 		        def logSnippet = ""
 		        try {
-		            def logLines = manager.getLogMatcher("(?s).*").group(0).split("\n") // Get full log
+		            def logLines = currentBuild.rawBuild.log.readLines() // Fetch full logs
 		            logSnippet = logLines.takeRight(50).join("\n") // Get last 50 lines
 		        } catch (Exception e) {
 		            logSnippet = "Could not retrieve logs: ${e.message}"
