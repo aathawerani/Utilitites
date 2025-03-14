@@ -167,7 +167,7 @@ pipeline {
 		            
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
-		                def maxAttempts = 2 // Maximum retries
+		                def maxAttempts = 30 // Maximum retries
 		                def attempt = 0
 
 		                while (attempt < maxAttempts) {
@@ -177,16 +177,17 @@ pipeline {
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
 		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
-		                        \$result | ConvertTo-Json -Compress
+		                        
+		                        # Ensure JSON formatting is correct
+		                        \$fixedResult = \$result | ConvertTo-Json -Depth 10 | ConvertFrom-Json | ConvertTo-Json -Depth 10 -Compress
+		                        echo \$fixedResult
 		                    """).trim()
 
 		                    echo "SonarQube API Response: ${response}"
 
 		                    try {
 		                        def jsonResponse = readJSON(text: response)
-		                        echo jsonResponse
 		                        sonarStatus = jsonResponse.projectStatus.status
-		                        echo sonarStatus
 		                    } catch (Exception e) {
 		                        error "❌ Failed to parse SonarQube API response: ${e.message}"
 		                    }
@@ -195,7 +196,7 @@ pipeline {
 		                        break
 		                    }
 
-		                    sleep 2 // Wait 10 seconds before retrying
+		                    sleep 10 // Wait 10 seconds before retrying
 		                    attempt++
 		                }
 
