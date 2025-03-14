@@ -163,7 +163,7 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            echo "⏳ Waiting for SonarQube analysis to complete..."
+		            echo "Waiting for SonarQube analysis to complete..."
 		            
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
@@ -187,12 +187,15 @@ pipeline {
 
 		                    try {
 		                        def jsonResponse = readJSON(text: response)
+		                		echo jsonResponse
 		                        sonarStatus = jsonResponse.projectStatus.status
+		                		echo sonarStatus
 		                    } catch (Exception e) {
-		                        error "❌ Failed to parse SonarQube API response: ${e.message}"
+		                        error "Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
+		                		echo "status ok or error breaking."
 		                        break
 		                    }
 
@@ -201,10 +204,10 @@ pipeline {
 		                }
 
 		                if (sonarStatus == "ERROR") {
-		                    error "❌ SonarQube analysis failed! Quality gate not passed."
+		                    error "SonarQube analysis failed! Quality gate not passed."
 		                }
 
-		                echo "✅ SonarQube analysis completed successfully."
+		                echo "SonarQube analysis completed successfully."
 
 		                // Email Report
 		                emailext(
