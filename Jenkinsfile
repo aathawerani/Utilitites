@@ -192,7 +192,7 @@ pipeline {
 						    try {
 						        def jsonResponse = readJSON(text: response)
 						        echo jsonResponse
-						        def sonarStatus = jsonResponse.projectStatus.status
+						        sonarStatus = jsonResponse.projectStatus.status
 						        echo sonarStatus
 
 						        if (sonarStatus == "ERROR") {
