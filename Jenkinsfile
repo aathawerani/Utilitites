@@ -172,24 +172,37 @@ pipeline {
 
 		                while (attempt < maxAttempts) {
 		                    def response = powershell(returnStdout: true, script: """
-		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
-		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
-		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
-		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
-		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
-		                        \$result | ConvertTo-Json -Compress
-		                    """).trim()
+						        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+						        \$token = "\$env:SONARQUBE_TOKEN" + ":"
+						        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
+						        \$headers = @{ Authorization = "Basic \$encodedToken" }
+						        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
 
-		                    echo "SonarQube API Response: ${response}"
+						        # Ensure JSON is properly formatted for Jenkins
+						        echo \$result | ConvertTo-Json -Depth 10 -Compress
+						    """).trim()
 
-		                    try {
-		                        def jsonResponse = readJSON(text: response)
-		                        echo jsonResponse
-		                        sonarStatus = jsonResponse.projectStatus.status
-		                        echo sonarStatus
-		                    } catch (Exception e) {
-		                        error "❌ Failed to parse SonarQube API response: ${e.message}"
-		                    }
+						    echo "SonarQube API Response: ${response}"
+
+						    // Fix JSON formatting issues
+						    response = response.replaceAll("'", "\"")  // Ensure double quotes
+						    response = response.replaceAll('("errorThreshold":")([0-9\.]+)(")', '$1$2$3')  // Remove unnecessary string wrapping around numbers
+						    response = response.replaceAll('("actualValue":")([0-9\.]+)(")', '$1$2$3')
+
+						    try {
+						        def jsonResponse = readJSON(text: response)
+						        echo jsonResponse
+						        def sonarStatus = jsonResponse.projectStatus.status
+						        echo sonarStatus
+
+						        if (sonarStatus == "ERROR") {
+						            error "❌ SonarQube analysis failed! Quality gate not passed."
+						        }
+
+						        echo "✅ SonarQube analysis completed successfully."
+						    } catch (Exception e) {
+						        error "❌ Failed to parse SonarQube API response: ${e.message}"
+						    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        echo "breaking"
