@@ -164,7 +164,7 @@ pipeline {
 		    steps {
 		        script {
 		            echo "⏳ Waiting for SonarQube analysis to complete..."
-		            
+
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
 		                def maxAttempts = 2 // Maximum retries
@@ -172,47 +172,54 @@ pipeline {
 
 		                while (attempt < maxAttempts) {
 		                    def response = powershell(returnStdout: true, script: """
-						        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
-						        \$token = "\$env:SONARQUBE_TOKEN" + ":"
-						        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
-						        \$headers = @{ Authorization = "Basic \$encodedToken" }
-						        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
+		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
+		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
+		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
+		                        
+		                        # Convert JSON to UTF-8 encoded string to prevent encoding issues
+		                        [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes(\$result | ConvertTo-Json -Depth 10 -Compress))
+		                    """).trim()
 
-						        # Ensure JSON is properly formatted for Jenkins
-						        echo \$result | ConvertTo-Json -Depth 10 -Compress
-						    """).trim()
+		                    echo "SonarQube API Raw Response: ${response}"
 
-						    echo "SonarQube API Response: ${response}"
+		                    // Ensure JSON formatting is correct before parsing
+		                    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
+		                    response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
 
-						    // Fix JSON formatting issues
-						    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
-    						response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
+		                    echo "Formatted JSON Response: ${response}"
 
-    						echo "Formatted JSON Response: ${response}"  // ✅ Print again to verify
+		                    try {
+		                        // Alternative parsing method using JsonSlurper instead of readJSON
+		                        def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
 
-						    try {
-						        def jsonResponse = readJSON(text: response)
-						        echo jsonResponse
-						        sonarStatus = jsonResponse.projectStatus.status
-						        echo sonarStatus
+		                        echo "Parsed JSON: ${jsonResponse}"
 
-						        if (sonarStatus == "ERROR") {
-		                        	echo "got here 1"
-						            error "❌ SonarQube analysis failed! Quality gate not passed."
-						        }
+		                        if (jsonResponse?.projectStatus?.status) {
+		                            sonarStatus = jsonResponse.projectStatus.status
+		                            echo "SonarQube Status: ${sonarStatus}"
+		                        } else {
+		                            error "❌ Invalid JSON response: Missing projectStatus field."
+		                        }
 
-						        echo "✅ SonarQube analysis completed successfully."
-						    } catch (Exception e) {
-	                        	echo "got here 2"
-						        error "❌ Failed to parse SonarQube API response: ${e.message}"
-						    }
+		                        if (sonarStatus == "ERROR") {
+		                            echo "❌ SonarQube analysis failed! Quality gate not passed."
+		                            error "Quality gate failed."
+		                        }
+
+		                        echo "✅ SonarQube analysis completed successfully."
+		                    } catch (Exception e) {
+		                        echo "❌ JSON Parsing Error: ${e.message}"
+		                        error "Failed to parse SonarQube API response: ${e.message}"
+		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
-		                        echo "breaking"
+		                        echo "✅ Breaking loop as status is final."
 		                        break
 		                    }
 
-		                    sleep 2 // Wait 10 seconds before retrying
+		                    sleep 10 // Wait 10 seconds before retrying
 		                    attempt++
 		                }
 
