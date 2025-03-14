@@ -255,6 +255,7 @@ pipeline {
 		                                        <p>Check the <a href='${sonarDashboardURL}'>SonarQube Dashboard</a> for more details.</p>
 		                                    </body>
 		                                </html>""",
+		            					mimeType: 'text/html',
 		                                //attachLog: true
 		                            )
 
@@ -370,6 +371,7 @@ pipeline {
 		            </body></html>
 		            """,
 		            mimeType: 'text/html',
+		            attachmentsPattern: "build.html",
                     attachLog: true
 		        )
 		    }
