@@ -185,9 +185,10 @@ pipeline {
 						    echo "SonarQube API Response: ${response}"
 
 						    // Fix JSON formatting issues
-						    response = response.replaceAll("'", "\"")  // Ensure double quotes
-						    response = response.replaceAll('("errorThreshold":")([0-9\\.]+)(")', '$1$2$3')  
-							response = response.replaceAll('("actualValue":")([0-9\\.]+)(")', '$1$2$3')
+						    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
+    						response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
+
+    						echo "Formatted JSON Response: ${response}"  // ✅ Print again to verify
 
 						    try {
 						        def jsonResponse = readJSON(text: response)
@@ -196,11 +197,13 @@ pipeline {
 						        echo sonarStatus
 
 						        if (sonarStatus == "ERROR") {
+		                        	echo "got here 1"
 						            error "❌ SonarQube analysis failed! Quality gate not passed."
 						        }
 
 						        echo "✅ SonarQube analysis completed successfully."
 						    } catch (Exception e) {
+	                        	echo "got here 2"
 						        error "❌ Failed to parse SonarQube API response: ${e.message}"
 						    }
 
