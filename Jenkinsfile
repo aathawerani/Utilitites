@@ -177,9 +177,9 @@ pipeline {
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
 		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
-		                        
-		                        # Convert JSON to UTF-8 encoded string to prevent encoding issues
-		                        [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes(\$result | ConvertTo-Json -Depth 10 -Compress))
+
+		                        # Ensure JSON is properly formatted for Jenkins and return it as a single-line string
+		                        \$result | ConvertTo-Json -Depth 10 -Compress
 		                    """).trim()
 
 		                    echo "SonarQube API Raw Response: ${response}"
@@ -191,7 +191,7 @@ pipeline {
 		                    echo "Formatted JSON Response: ${response}"
 
 		                    try {
-		                        // Alternative parsing method using JsonSlurper instead of readJSON
+		                        // Parse JSON response using JsonSlurper
 		                        def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
 
 		                        echo "Parsed JSON: ${jsonResponse}"
