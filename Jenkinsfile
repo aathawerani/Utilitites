@@ -186,8 +186,8 @@ pipeline {
 
 						    // Fix JSON formatting issues
 						    response = response.replaceAll("'", "\"")  // Ensure double quotes
-						    response = response.replaceAll('("errorThreshold":")([0-9\.]+)(")', '$1$2$3')  // Remove unnecessary string wrapping around numbers
-						    response = response.replaceAll('("actualValue":")([0-9\.]+)(")', '$1$2$3')
+						    response = response.replaceAll('("errorThreshold":")([0-9\\.]+)(")', '$1$2$3')  
+							response = response.replaceAll('("actualValue":")([0-9\\.]+)(")', '$1$2$3')
 
 						    try {
 						        def jsonResponse = readJSON(text: response)
