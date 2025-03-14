@@ -13,7 +13,7 @@ pipeline {
 		stage('Checkout'){
 			steps{
 				script {
-					failedStage = "Checkout"  // ✅ Set stage name
+					failedStage = "Checkout"  //Set stage name
                 }
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
@@ -21,7 +21,7 @@ pipeline {
 		stage('Dependency Check') {
             steps {
 	            script {
-	        		failedStage = "Dependency Check"  // ✅ Set stage name
+	        		failedStage = "Dependency Check"  //Set stage name
 	        	}
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
 			}
@@ -36,7 +36,7 @@ pipeline {
 				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
 				)
                 script {
-            		failedStage = "Dependency Check Report"  // ✅ Set stage name
+            		failedStage = "Dependency Check Report"  //Set stage name
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
                     def criticalIssues = [] 
@@ -79,12 +79,12 @@ pipeline {
                         }
                     }
 
-                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
+                    //Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
 					for (issue in allIssues) {
 					    if (!existingIssues.any { it.title == issue.title }) {
 					        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-					            // ✅ Write JSON payload to a file
+					            //Write JSON payload to a file
 					            def jsonPayload = """
 					            {
 					                "title": "${issue.title}",
@@ -94,7 +94,7 @@ pipeline {
 					            """
 					            writeFile file: "payload.json", text: jsonPayload
 
-					            // ✅ Use `-d @payload.json` instead of inline JSON
+					            //Use `-d @payload.json` instead of inline JSON
 					            bat """
 					                "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
 					                -H "Accept: application/vnd.github.v3+json" ^
@@ -124,31 +124,20 @@ pipeline {
 							    """,
 		                    attachmentsPattern: "dependency-check-report/dependency-check-report.html"
 		                )
-						//mail(
-					        //to: "${EMAIL_RECIPIENT}",
-					        //subject: "Dependency-Check Report",
-					        //body: """<html>
-				                //<body>
-				                //<p>Attached below is the security report.</p>
-				                //${htmlContent}
-				                //</body></html>""",
-				                //mimeType: 'text/html'
-					    //)
-					    echo "Email sent with embedded HTML Dependency-Check report."
 					}
-		            //if (!criticalIssues.isEmpty()) {
+		            if (!criticalIssues.isEmpty()) {
 					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					    //echo "Critical issues found. Pipeline continuing for testing."
-					//} else {
-		                //echo "No critical issues found. Pipeline continuing."
-		            //}
+					    echo "Critical issues found. Pipeline continuing for testing."
+					} else {
+		                echo "No critical issues found. Pipeline continuing."
+		            }
                 }
             }
         }
 		stage('Build'){
 			steps{
 				script {
-					failedStage = "Build"  // ✅ Set stage name
+					failedStage = "Build"  //Set stage name
                 }
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
 					bat 'dotnet restore'
@@ -195,8 +184,6 @@ pipeline {
 		                        \$result | ConvertTo-Json -Depth 10 -Compress
 		                    """).trim()
 
-		                    echo "SonarQube API Raw Response: ${response}"
-
 		                    // Ensure JSON formatting is correct before parsing
 		                    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
 		                    response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
@@ -207,17 +194,13 @@ pipeline {
 		                        // Parse JSON response using JsonSlurper
 		                        def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
 
-		                        echo "Parsed JSON: ${jsonResponse}"
-
 		                        if (jsonResponse?.projectStatus?.status) {
 		                            sonarStatus = jsonResponse.projectStatus.status
-		                            echo "SonarQube Status: ${sonarStatus}"
 		                        } else {
 		                            error "Invalid JSON response: Missing projectStatus field."
 		                        }
 
 		                        if (sonarStatus == "ERROR") {
-		                            echo "SonarQube analysis failed! Quality gate not passed."
 
 		                            // Extract failing metrics
 		                            def failingMetrics = jsonResponse.projectStatus.conditions.findAll { it.status == "ERROR" }
@@ -241,8 +224,6 @@ pipeline {
 		                                return "**${description}** (Threshold: < ${it.errorThreshold}, Found: ${it.actualValue})"
 		                            }.join("\n")
 
-		                            echo "Failing Metrics:\n${failureDetails}"
-
 		                            // Send email with failure details
 		                            emailext(
 		                                to: "${EMAIL_RECIPIENT}",
@@ -256,20 +237,21 @@ pipeline {
 		                                    </body>
 		                                </html>""",
 		            					mimeType: 'text/html',
-		                                //attachLog: true
 		                            )
-
-		                            error "Quality gate failed due to failing metrics."
+		                        } else {
+					                // Email Report
+					                emailext(
+					                    to: "${EMAIL_RECIPIENT}",
+					                    subject: "SonarQube Report for QR-code",
+					                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+					                    //attachLog: true
+					                )
 		                        }
-
-		                        echo "SonarQube analysis completed successfully."
 		                    } catch (Exception e) {
-		                        echo "JSON Parsing Error: ${e.message}"
 		                        error "Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
-		                        echo "Breaking loop as status is final."
 		                        break
 		                    }
 
@@ -280,16 +262,6 @@ pipeline {
 		                if (sonarStatus == "ERROR") {
 		                    error "SonarQube analysis failed! Quality gate not passed."
 		                }
-
-		                echo "SonarQube analysis completed successfully."
-
-		                // Email Report
-		                emailext(
-		                    to: "${EMAIL_RECIPIENT}",
-		                    subject: "SonarQube Report for QR-code",
-		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
-		                    attachLog: true
-		                )
 		            }
 		        }
 		    }
@@ -341,7 +313,8 @@ pipeline {
                 to: "${EMAIL_RECIPIENT}",
                 subject: "SUCCESS: ${currentBuild.fullDisplayName}",
                 body: "Good news! The build ${currentBuild.fullDisplayName} succeeded. Check it out at ${env.BUILD_URL}.",
-                mimeType: 'text/html'
+                mimeType: 'text/html',
+                attachLog: true
             )
         }
 		failure {
@@ -371,7 +344,6 @@ pipeline {
 		            </body></html>
 		            """,
 		            mimeType: 'text/html',
-		            attachmentsPattern: "build.html",
                     attachLog: true
 		        )
 		    }
@@ -381,7 +353,8 @@ pipeline {
                 to: "${EMAIL_RECIPIENT}",
                 subject: "UNSTABLE: ${currentBuild.fullDisplayName}",
                 body: "The build ${currentBuild.fullDisplayName} is unstable. Please check the results at ${env.BUILD_URL}.",
-                mimeType: 'text/html'
+                mimeType: 'text/html',
+                attachLog: true
             )
         }
     }
