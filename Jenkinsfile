@@ -117,7 +117,11 @@ pipeline {
 		            	emailext(
 		                    to: "${EMAIL_RECIPIENT}",
 		                    subject: "Dependency-Check Report for QR-code",
-		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+		                    body: """
+							    Attached is the full Dependency-Check security report.
+
+							    **Critical Issues Found:** ${criticalIssues.size()}
+							    """,
 		                    attachmentsPattern: "dependency-check-report/dependency-check-report.html"
 		                )
 						//mail(
