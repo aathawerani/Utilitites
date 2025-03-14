@@ -163,11 +163,11 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            echo "Waiting for SonarQube analysis to complete..."
+		            echo "⏳ Waiting for SonarQube analysis to complete..."
 		            
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
-		                def maxAttempts = 30 // Maximum retries
+		                def maxAttempts = 30
 		                def attempt = 0
 
 		                while (attempt < maxAttempts) {
@@ -176,38 +176,39 @@ pipeline {
 		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
-		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
-		                        
-		                        # Ensure JSON formatting is correct
-		                        \$fixedResult = \$result | ConvertTo-Json -Depth 10 | ConvertFrom-Json | ConvertTo-Json -Depth 10 -Compress
-		                        echo \$fixedResult
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
+
+		                        # Output raw JSON instead of converting multiple times
+		                        echo \$result | ConvertTo-Json -Depth 10 -Compress
 		                    """).trim()
 
 		                    echo "SonarQube API Response: ${response}"
 
+		                    // Ensure Jenkins reads the JSON correctly
 		                    try {
+		                        response = response.replaceAll("'", "\"") // Replace single quotes if any
 		                        def jsonResponse = readJSON(text: response)
-		                		echo jsonResponse
+		                        echo jsonResponse
 		                        sonarStatus = jsonResponse.projectStatus.status
-		                		echo sonarStatus
+		                        echo sonarStatus
 		                    } catch (Exception e) {
-		                        error "Failed to parse SonarQube API response: ${e.message}"
+		                        error "❌ Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
-		                		echo "status ok or error breaking."
+		                    	echo "breaking"
 		                        break
 		                    }
 
-		                    sleep 10 // Wait 10 seconds before retrying
+		                    sleep 10
 		                    attempt++
 		                }
 
 		                if (sonarStatus == "ERROR") {
-		                    error "SonarQube analysis failed! Quality gate not passed."
+		                    error "❌ SonarQube analysis failed! Quality gate not passed."
 		                }
 
-		                echo "SonarQube analysis completed successfully."
+		                echo "✅ SonarQube analysis completed successfully."
 
 		                // Email Report
 		                emailext(
