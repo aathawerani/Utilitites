@@ -114,16 +114,22 @@ pipeline {
 		            def htmlContent = readFile(htmlReport)
 
 		            if (!allIssues.isEmpty()) {
-						mail(
-					        to: "${EMAIL_RECIPIENT}",
-					        subject: "Dependency-Check Report",
-					        body: """<html>
-				                <body>
-				                <p>Attached below is the security report.</p>
-				                ${htmlContent}
-				                </body></html>""",
-				                mimeType: 'text/html'
-					    )
+		            	emailext(
+		                    to: "${EMAIL_RECIPIENT}",
+		                    subject: "Dependency-Check Report for QR-code",
+		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+		                    attachmentsPattern: "dependency-check-report/dependency-check-report.html"
+		                )
+						//mail(
+					        //to: "${EMAIL_RECIPIENT}",
+					        //subject: "Dependency-Check Report",
+					        //body: """<html>
+				                //<body>
+				                //<p>Attached below is the security report.</p>
+				                //${htmlContent}
+				                //</body></html>""",
+				                //mimeType: 'text/html'
+					    //)
 					    echo "Email sent with embedded HTML Dependency-Check report."
 					}
 		            //if (!criticalIssues.isEmpty()) {
@@ -163,16 +169,19 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            echo "⏳ Waiting for SonarQube analysis to complete..."
+		            echo "Waiting for SonarQube analysis to complete..."
 
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
 		                def maxAttempts = 2 // Maximum retries
 		                def attempt = 0
+		                def sonarHost = "http://localhost:9000"  // Update if different
+		                def sonarProjectKey = "QR-code"  // Update with your project key
+		                def sonarDashboardURL = "${sonarHost}/dashboard?id=${sonarProjectKey}"
 
 		                while (attempt < maxAttempts) {
 		                    def response = powershell(returnStdout: true, script: """
-		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$sonarUrl = "${sonarHost}/api/qualitygates/project_status?projectKey=${sonarProjectKey}"
 		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
@@ -200,44 +209,62 @@ pipeline {
 		                            sonarStatus = jsonResponse.projectStatus.status
 		                            echo "SonarQube Status: ${sonarStatus}"
 		                        } else {
-		                            error "❌ Invalid JSON response: Missing projectStatus field."
+		                            error "Invalid JSON response: Missing projectStatus field."
 		                        }
 
 		                        if (sonarStatus == "ERROR") {
-		                            echo "❌ SonarQube analysis failed! Quality gate not passed."
+		                            echo "SonarQube analysis failed! Quality gate not passed."
 
 		                            // Extract failing metrics
 		                            def failingMetrics = jsonResponse.projectStatus.conditions.findAll { it.status == "ERROR" }
+
+		                            def metricDescriptions = [
+		                                "new_violations": "New Violations",
+		                                "new_duplicated_lines_density": "New Duplicated Lines Density",
+		                                "new_security_hotspots": "New Security Hotspots",
+		                                "new_code_smells": "New Code Smells",
+		                                "coverage": "Code Coverage",
+		                                "new_coverage": "New Code Coverage",
+		                                "duplicated_lines_density": "Duplicated Lines Density",
+		                                "sqale_rating": "Maintainability Rating",
+		                                "security_rating": "Security Rating",
+		                                "reliability_rating": "Reliability Rating"
+		                            ]
+		                            // Format failure details
 		                            def failureDetails = failingMetrics.collect { 
-		                                "❌ ${it.metricKey}: Expected < ${it.errorThreshold}, Found ${it.actualValue}"
+		                                def metricKey = it.metricKey
+		                                def description = metricDescriptions.getOrDefault(metricKey, metricKey)
+		                                return "**${description}** (Threshold: < ${it.errorThreshold}, Found: ${it.actualValue})"
 		                            }.join("\n")
 
-		                            echo "🔴 Failing Metrics:\n${failureDetails}"
+		                            echo "Failing Metrics:\n${failureDetails}"
 
 		                            // Send email with failure details
 		                            emailext(
-		                                to: 'athawerani@gmail.com',
-		                                subject: "❌ SonarQube Analysis Failed for QR-code",
-		                                body: """SonarQube Quality Gate FAILED!
-
-		                                **Failing Metrics:**
-		                                ${failureDetails}
-
-		                                Check SonarQube Dashboard for more details.""",
-		                                attachLog: true
+		                                to: "${EMAIL_RECIPIENT}",
+		                                subject: "SonarQube Analysis Failed for QR-code",
+		                                body: """<html>
+		                                    <body>
+		                                        <h2>SonarQube Quality Gate FAILED!</h2>
+		                                        <p><strong>Failing Metrics:</strong></p>
+		                                        <pre>${failureDetails}</pre>
+		                                        <p>Check the <a href='${sonarDashboardURL}'>SonarQube Dashboard</a> for more details.</p>
+		                                    </body>
+		                                </html>""",
+		                                //attachLog: true
 		                            )
 
 		                            error "Quality gate failed due to failing metrics."
 		                        }
 
-		                        echo "✅ SonarQube analysis completed successfully."
+		                        echo "SonarQube analysis completed successfully."
 		                    } catch (Exception e) {
-		                        echo "❌ JSON Parsing Error: ${e.message}"
+		                        echo "JSON Parsing Error: ${e.message}"
 		                        error "Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
-		                        echo "✅ Breaking loop as status is final."
+		                        echo "Breaking loop as status is final."
 		                        break
 		                    }
 
@@ -246,15 +273,15 @@ pipeline {
 		                }
 
 		                if (sonarStatus == "ERROR") {
-		                    error "❌ SonarQube analysis failed! Quality gate not passed."
+		                    error "SonarQube analysis failed! Quality gate not passed."
 		                }
 
-		                echo "✅ SonarQube analysis completed successfully."
+		                echo "SonarQube analysis completed successfully."
 
 		                // Email Report
 		                emailext(
-		                    to: 'athawerani@gmail.com',
-		                    subject: "✅ SonarQube Report for QR-code",
+		                    to: "${EMAIL_RECIPIENT}",
+		                    subject: "SonarQube Report for QR-code",
 		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
 		                    attachLog: true
 		                )
@@ -338,7 +365,8 @@ pipeline {
 		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for full details.</p>
 		            </body></html>
 		            """,
-		            mimeType: 'text/html'
+		            mimeType: 'text/html',
+                    attachLog: true
 		        )
 		    }
 		}
