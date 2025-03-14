@@ -205,7 +205,29 @@ pipeline {
 
 		                        if (sonarStatus == "ERROR") {
 		                            echo "❌ SonarQube analysis failed! Quality gate not passed."
-		                            error "Quality gate failed."
+
+		                            // Extract failing metrics
+		                            def failingMetrics = jsonResponse.projectStatus.conditions.findAll { it.status == "ERROR" }
+		                            def failureDetails = failingMetrics.collect { 
+		                                "❌ ${it.metricKey}: Expected < ${it.errorThreshold}, Found ${it.actualValue}"
+		                            }.join("\n")
+
+		                            echo "🔴 Failing Metrics:\n${failureDetails}"
+
+		                            // Send email with failure details
+		                            emailext(
+		                                to: 'athawerani@gmail.com',
+		                                subject: "❌ SonarQube Analysis Failed for QR-code",
+		                                body: """SonarQube Quality Gate FAILED!
+
+		                                **Failing Metrics:**
+		                                ${failureDetails}
+
+		                                Check SonarQube Dashboard for more details.""",
+		                                attachLog: true
+		                            )
+
+		                            error "Quality gate failed due to failing metrics."
 		                        }
 
 		                        echo "✅ SonarQube analysis completed successfully."
@@ -232,7 +254,7 @@ pipeline {
 		                // Email Report
 		                emailext(
 		                    to: 'athawerani@gmail.com',
-		                    subject: "SonarQube Report for QR-code",
+		                    subject: "✅ SonarQube Report for QR-code",
 		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
 		                    attachLog: true
 		                )
