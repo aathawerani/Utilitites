@@ -181,24 +181,29 @@ pipeline {
 		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
 
 		                        # Ensure JSON is properly formatted for Jenkins and return it as a single-line string
-		                        \$result | ConvertTo-Json -Depth 10 -Compress
+		                        \$result | ConvertTo-Json -Depth 20 -Compress
 		                    """).trim()
+
+		                    echo "SonarQube API Raw Response: ${response}"  // Log raw response for debugging
 
 		                    // Ensure JSON formatting is correct before parsing
 		                    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
 		                    response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
 
-		                    echo "Formatted JSON Response: ${response}"
-
 		                    try {
+		                    	if (!response || response.contains("error")) {
+		                            error "Received an invalid SonarQube API response: ${response}"
+		                        }
+
 		                        // Parse JSON response using JsonSlurper
 		                        def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
 
-		                        if (jsonResponse?.projectStatus?.status) {
-		                            sonarStatus = jsonResponse.projectStatus.status
-		                        } else {
-		                            error "Invalid JSON response: Missing projectStatus field."
+		                        if (!jsonResponse?.projectStatus?.status) {
+		                            error "Invalid JSON structure: Missing 'projectStatus' field."
 		                        }
+
+		                        sonarStatus = jsonResponse.projectStatus.status
+		                        echo "SonarQube Status: ${sonarStatus}"
 
 		                        if (sonarStatus == "ERROR") {
 
@@ -244,7 +249,6 @@ pipeline {
 					                    to: "${EMAIL_RECIPIENT}",
 					                    subject: "SonarQube Report for QR-code",
 					                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
-					                    //attachLog: true
 					                )
 		                        }
 		                    } catch (Exception e) {
