@@ -167,7 +167,7 @@ pipeline {
 		            
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
-		                def maxAttempts = 30
+		                def maxAttempts = 2 // Maximum retries
 		                def attempt = 0
 
 		                while (attempt < maxAttempts) {
@@ -176,17 +176,13 @@ pipeline {
 		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
-		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
-
-		                        # Output raw JSON instead of converting multiple times
-		                        echo \$result | ConvertTo-Json -Depth 10 -Compress
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
+		                        \$result | ConvertTo-Json -Compress
 		                    """).trim()
 
 		                    echo "SonarQube API Response: ${response}"
 
-		                    // Ensure Jenkins reads the JSON correctly
 		                    try {
-		                        response = response.replaceAll("'", "\"") // Replace single quotes if any
 		                        def jsonResponse = readJSON(text: response)
 		                        echo jsonResponse
 		                        sonarStatus = jsonResponse.projectStatus.status
@@ -196,11 +192,11 @@ pipeline {
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
-		                    	echo "breaking"
+		                        echo "breaking"
 		                        break
 		                    }
 
-		                    sleep 10
+		                    sleep 2 // Wait 10 seconds before retrying
 		                    attempt++
 		                }
 
