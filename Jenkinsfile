@@ -253,7 +253,7 @@ pipeline {
 					                )
 		                        }
 		                    } catch (Exception e) {
-		                        error "Failed to parse SonarQube API response: ${e.message}"
+		                        //error "Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
