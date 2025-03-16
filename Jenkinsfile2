@@ -1,0 +1,129 @@
+def failedStage = "Unknown Stage"  // Variable to track failed stage
+
+pipeline {
+    agent any
+    environment {
+        GIT_CREDENTIALS_ID = 'github-credentials'
+        GITHUB_REPO = 'aathawerani/Utilitites'
+        GITHUB_TOKEN = credentials('github-token')
+        EMAIL_RECIPIENT = 'athawerani@gmail.com'
+        DOCKER_IMAGE = "my-dotnet8-app"
+        IMAGE_TAG = "latest"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    failedStage = "Checkout"
+                }
+                git branch: 'main', credentialsId: "${GIT_CREDENTIALS_ID}", url: "https://${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git"
+            }
+        }
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    failedStage = "Docker Build & Push"
+                    bat """
+                        docker build -t %DOCKER_IMAGE%:%IMAGE_TAG% .
+                        docker tag %DOCKER_IMAGE%:%IMAGE_TAG% %DOCKER_IMAGE%:%BUILD_NUMBER%
+                        docker images
+                    """
+                }
+            }
+        }
+        stage('Load Docker Image into Kubernetes') {
+            steps {
+                script {
+                    failedStage = "Load Docker Image into Kubernetes"
+                    bat "kind load docker-image %DOCKER_IMAGE%:%IMAGE_TAG%"
+                }
+            }
+        }
+        stage('Deploy to Kubernetes using Ansible') {
+            steps {
+                script {
+                    failedStage = "Deploy to Kubernetes using Ansible"
+                    bat "wsl ansible-playbook -i inventory.ini deploy_app.yml"
+                }
+            }
+        }
+        stage('Verify Deployment') {
+	    steps {
+	        script {
+	            // Wait for pods to be ready
+	            bat "wsl kubectl rollout status deployment/my-dotnet-app --timeout=60s"
+
+	            // Fetch the NodePort dynamically
+	            def nodePort = bat(script: "wsl kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
+
+	            // Check if the service is accessible
+	            bat "wsl curl --fail http://localhost:${nodePort} || exit 1"
+	        }
+	    }
+    }
+    post {
+        success {
+            emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "SUCCESS: ${currentBuild.fullDisplayName}",
+                body: """
+                <html>
+                <body>
+                <h2>Jenkins Pipeline Build Succeeded 🎉</h2>
+                <p><strong>Build:</strong> ${currentBuild.fullDisplayName}</p>
+                <p><strong>Branch:</strong> ${GITHUB_REPO}</p>
+                <p><a href="${env.BUILD_URL}">Click here</a> to view details.</p>
+                </body></html>
+                """,
+                mimeType: 'text/html',
+                attachLog: true
+            )
+        }
+
+        failure {
+            script {
+                echo "Jenkins Pipeline Failed! Sending email notification."
+                def buildStatus = currentBuild.result ?: "FAILED"
+                def buildDuration = currentBuild.durationString
+                def timestamp = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('UTC'))
+
+                emailext (
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                    <html>
+                    <body>
+                    <h2>Jenkins Pipeline Failure Notification 🚨</h2>
+                    <p><strong>Build Status:</strong> ${buildStatus}</p>
+                    <p><strong>Failed Stage:</strong> ${failedStage}</p>
+                    <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Build Duration:</strong> ${buildDuration}</p>
+                    <p><strong>Timestamp (UTC):</strong> ${timestamp}</p>
+                    <p><strong>Job:</strong> <a href="${env.BUILD_URL}">${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                    <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for full details.</p>
+                    </body></html>
+                    """,
+                    mimeType: 'text/html',
+                    attachLog: true
+                )
+            }
+        }
+
+        unstable {
+            emailext (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "UNSTABLE: ${currentBuild.fullDisplayName}",
+                body: """
+                <html>
+                <body>
+                <h2>Jenkins Pipeline is Unstable ⚠️</h2>
+                <p>The build <strong>${currentBuild.fullDisplayName}</strong> completed with warnings.</p>
+                <p>Please check the results at <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>.</p>
+                </body></html>
+                """,
+                mimeType: 'text/html',
+                attachLog: true
+            )
+        }
+    }
+}

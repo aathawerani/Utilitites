@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: my-dotnet-app
-          image: my-dotnet8-app:latest  # No registry needed
-          imagePullPolicy: IfNotPresent  # Prevent pulling from remote registry
+          image: my-dotnet8-app:latest  # Local image, built in Jenkins
+          imagePullPolicy: Never        # Ensures it uses the locally built image
           ports:
             - containerPort: 8080
