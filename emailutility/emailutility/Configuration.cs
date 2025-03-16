@@ -30,8 +30,8 @@ namespace emailutility
         public string EmailSentYes { get { return "Yes"; } }
         public string smtpServer { get { return "smtp.office365.com"; } }
         public int smtpPort { get { return 587; } }
-        public string senderEmail { get { return "dev_test@dhsarabia.com"; } }
-        public string senderPassword { get { return "L!104206117388ud"; } }
+        public string senderEmail { get { return "ttttttt@dhsarabia.com"; } }
+        public string senderPassword { get { return "11111111111111111"; } }
         public string subject { get { return "Provider Invoice "; } }
         public string body { get { return "This is a test email with an attachment."; } }
         public int XLHeaderRow { get { return 1; } }

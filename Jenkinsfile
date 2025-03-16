@@ -13,7 +13,7 @@ pipeline {
 		stage('Checkout'){
 			steps{
 				script {
-					failedStage = "Checkout"  // ✅ Set stage name
+					failedStage = "Checkout"  //Set stage name
                 }
 				git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/aathawerani/Utilitites.git'
 			}
@@ -21,7 +21,7 @@ pipeline {
 		stage('Dependency Check') {
             steps {
 	            script {
-	        		failedStage = "Dependency Check"  // ✅ Set stage name
+	        		failedStage = "Dependency Check"  //Set stage name
 	        	}
                 bat '"D:\\DevOps\\Dependency-Check\\bin\\dependency-check.bat" --project "QR-code" --scan . --format JSON --format HTML --format XML --out dependency-check-report --nvdApiKey da276fc5-0eba-4a30-88ec-220c690c9d53 --log dependency-check.log'
 			}
@@ -36,7 +36,7 @@ pipeline {
 				    //failedTotalMedium: 5     // Pipeline fails if 5+ Medium issues exist
 				)
                 script {
-            		failedStage = "Dependency Check Report"  // ✅ Set stage name
+            		failedStage = "Dependency Check Report"  //Set stage name
                     def reportFile = 'dependency-check-report/dependency-check-report.json'
                     def allIssues = []
                     def criticalIssues = [] 
@@ -79,12 +79,12 @@ pipeline {
                         }
                     }
 
-                    // ✅ Call the closure like a function: doesIssueExist(issue.title)
+                    //Call the closure like a function: doesIssueExist(issue.title)
                     def existingIssues = getExistingIssues()
 					for (issue in allIssues) {
 					    if (!existingIssues.any { it.title == issue.title }) {
 					        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-					            // ✅ Write JSON payload to a file
+					            //Write JSON payload to a file
 					            def jsonPayload = """
 					            {
 					                "title": "${issue.title}",
@@ -94,7 +94,7 @@ pipeline {
 					            """
 					            writeFile file: "payload.json", text: jsonPayload
 
-					            // ✅ Use `-d @payload.json` instead of inline JSON
+					            //Use `-d @payload.json` instead of inline JSON
 					            bat """
 					                "D:\\DevOps\\curl\\bin\\curl.exe" -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
 					                -H "Accept: application/vnd.github.v3+json" ^
@@ -114,31 +114,30 @@ pipeline {
 		            def htmlContent = readFile(htmlReport)
 
 		            if (!allIssues.isEmpty()) {
-						mail(
-					        to: "${EMAIL_RECIPIENT}",
-					        subject: "Dependency-Check Report",
-					        body: """<html>
-				                <body>
-				                <p>Attached below is the security report.</p>
-				                ${htmlContent}
-				                </body></html>""",
-				                mimeType: 'text/html'
-					    )
-					    echo "Email sent with embedded HTML Dependency-Check report."
+		            	emailext(
+		                    to: "${EMAIL_RECIPIENT}",
+		                    subject: "Dependency-Check Report for QR-code",
+		                    body: """
+							    Attached is the full Dependency-Check security report.
+
+							    **Critical Issues Found:** ${criticalIssues.size()}
+							    """,
+		                    attachmentsPattern: "dependency-check-report/dependency-check-report.html"
+		                )
 					}
-		            //if (!criticalIssues.isEmpty()) {
+		            if (!criticalIssues.isEmpty()) {
 					    //error "Pipeline halted due to ${criticalIssues.size()} critical security vulnerabilities."
-					    //echo "Critical issues found. Pipeline continuing for testing."
-					//} else {
-		                //echo "No critical issues found. Pipeline continuing."
-		            //}
+					    echo "Critical issues found. Pipeline continuing for testing."
+					} else {
+		                echo "No critical issues found. Pipeline continuing."
+		            }
                 }
             }
         }
 		stage('Build'){
 			steps{
 				script {
-					failedStage = "Build"  // ✅ Set stage name
+					failedStage = "Build"  //Set stage name
                 }
 				dir('GenerateQR/GenerateQR_v3/GenerateQR'){
 					bat 'dotnet restore'
@@ -163,51 +162,112 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            echo "⏳ Waiting for SonarQube analysis to complete..."
-		            
+		            echo "Waiting for SonarQube analysis to complete..."
+
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
 		                def maxAttempts = 2 // Maximum retries
 		                def attempt = 0
+		                def sonarHost = "http://localhost:9000"  // Update if different
+		                def sonarProjectKey = "QR-code"  // Update with your project key
+		                def sonarDashboardURL = "${sonarHost}/dashboard?id=${sonarProjectKey}"
 
 		                while (attempt < maxAttempts) {
 		                    def response = powershell(returnStdout: true, script: """
-		                        \$sonarUrl = "http://localhost:9000/api/qualitygates/project_status?projectKey=QR-code"
+		                        \$sonarUrl = "${sonarHost}/api/qualitygates/project_status?projectKey=${sonarProjectKey}"
 		                        \$token = "\$env:SONARQUBE_TOKEN" + ":"
 		                        \$encodedToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\$token))
 		                        \$headers = @{ Authorization = "Basic \$encodedToken" }
-		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get
-		                        \$result | ConvertTo-Json -Compress
+		                        \$result = Invoke-RestMethod -Uri \$sonarUrl -Headers \$headers -Method Get -ContentType "application/json"
+
+		                        # Ensure JSON is properly formatted for Jenkins and return it as a single-line string
+		                        \$result | ConvertTo-Json -Depth 20 -Compress
 		                    """).trim()
 
-		                    echo response
+		                    echo "SonarQube API Raw Response: ${response}"  // Log raw response for debugging
 
-		                    def jsonResponse = readJSON(text: response)
-		                    echo jsonResponse
-		                    sonarStatus = jsonResponse.status
-		                    echo sonarStatus
+		                    // Ensure JSON formatting is correct before parsing
+		                    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
+		                    response = response.replaceAll('"actualValue":"([0-9\\.]+)"', '"actualValue":$1')
+
+		                    try {
+		                    	if (!response || response.contains("error")) {
+		                            error "Received an invalid SonarQube API response: ${response}"
+		                        }
+
+		                        // Parse JSON response using JsonSlurper
+		                        //def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
+		                        def jsonResponse = response
+
+		                        if (!jsonResponse?.projectStatus?.status) {
+		                            error "Invalid JSON structure: Missing 'projectStatus' field."
+		                        }
+
+		                        sonarStatus = jsonResponse.projectStatus.status
+		                        echo "SonarQube Status: ${sonarStatus}"
+
+		                        if (sonarStatus == "ERROR") {
+
+		                            // Extract failing metrics
+		                            def failingMetrics = jsonResponse.projectStatus.conditions.findAll { it.status == "ERROR" }
+
+		                            def metricDescriptions = [
+		                                "new_violations": "New Violations",
+		                                "new_duplicated_lines_density": "New Duplicated Lines Density",
+		                                "new_security_hotspots": "New Security Hotspots",
+		                                "new_code_smells": "New Code Smells",
+		                                "coverage": "Code Coverage",
+		                                "new_coverage": "New Code Coverage",
+		                                "duplicated_lines_density": "Duplicated Lines Density",
+		                                "sqale_rating": "Maintainability Rating",
+		                                "security_rating": "Security Rating",
+		                                "reliability_rating": "Reliability Rating"
+		                            ]
+		                            // Format failure details
+		                            def failureDetails = failingMetrics.collect { 
+		                                def metricKey = it.metricKey
+		                                def description = metricDescriptions.getOrDefault(metricKey, metricKey)
+		                                return "**${description}** (Threshold: < ${it.errorThreshold}, Found: ${it.actualValue})"
+		                            }.join("\n")
+
+		                            // Send email with failure details
+		                            emailext(
+		                                to: "${EMAIL_RECIPIENT}",
+		                                subject: "SonarQube Analysis Failed for QR-code",
+		                                body: """<html>
+		                                    <body>
+		                                        <h2>SonarQube Quality Gate FAILED!</h2>
+		                                        <p><strong>Failing Metrics:</strong></p>
+		                                        <pre>${failureDetails}</pre>
+		                                        <p>Check the <a href='${sonarDashboardURL}'>SonarQube Dashboard</a> for more details.</p>
+		                                    </body>
+		                                </html>""",
+		            					mimeType: 'text/html',
+		                            )
+		                        } else {
+					                // Email Report
+					                emailext(
+					                    to: "${EMAIL_RECIPIENT}",
+					                    subject: "SonarQube Report for QR-code",
+					                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
+					                )
+		                        }
+		                    } catch (Exception e) {
+		                        //error "Failed to parse SonarQube API response: ${e.message}"
+		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {
 		                        break
 		                    }
 
-		                    sleep 2 // Wait 10 seconds before retrying
+		                    sleep 10 // Wait 10 seconds before retrying
 		                    attempt++
 		                }
 
 		                if (sonarStatus == "ERROR") {
-		                    error "❌ SonarQube analysis failed! Quality gate not passed."
+		                    //error "SonarQube analysis failed! Quality gate not passed."
+		                    echo "SonarQube analysis failed! Quality gate not passed."
 		                }
-
-		                echo "✅ SonarQube analysis completed successfully."
-
-		                // Email Report
-		                emailext(
-		                    to: 'athawerani@gmail.com',
-		                    subject: "SonarQube Report for QR-code",
-		                    body: "SonarQube analysis completed.\nQuality Gate Status: ${sonarStatus}",
-		                    attachLog: true
-		                )
 		            }
 		        }
 		    }
@@ -259,7 +319,8 @@ pipeline {
                 to: "${EMAIL_RECIPIENT}",
                 subject: "SUCCESS: ${currentBuild.fullDisplayName}",
                 body: "Good news! The build ${currentBuild.fullDisplayName} succeeded. Check it out at ${env.BUILD_URL}.",
-                mimeType: 'text/html'
+                mimeType: 'text/html',
+                attachLog: true
             )
         }
 		failure {
@@ -288,7 +349,8 @@ pipeline {
 		            <p>Please check the <a href="${env.BUILD_URL}console">Jenkins Console Logs</a> for full details.</p>
 		            </body></html>
 		            """,
-		            mimeType: 'text/html'
+		            mimeType: 'text/html',
+                    attachLog: true
 		        )
 		    }
 		}
@@ -297,7 +359,8 @@ pipeline {
                 to: "${EMAIL_RECIPIENT}",
                 subject: "UNSTABLE: ${currentBuild.fullDisplayName}",
                 body: "The build ${currentBuild.fullDisplayName} is unstable. Please check the results at ${env.BUILD_URL}.",
-                mimeType: 'text/html'
+                mimeType: 'text/html',
+                attachLog: true
             )
         }
     }
