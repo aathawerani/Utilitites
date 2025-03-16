@@ -197,8 +197,8 @@ pipeline {
 		                        }
 
 		                        // Parse JSON response using JsonSlurper
-		                        //def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
-		                        def jsonResponse = response
+		                        def jsonResponse = new groovy.json.JsonSlurper().parseText(response)
+		                        //def jsonResponse = response
 
 		                        if (!jsonResponse?.projectStatus?.status) {
 		                            //error "Invalid JSON structure: Missing 'projectStatus' field."
