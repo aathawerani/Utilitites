@@ -23,6 +23,8 @@ pipeline {
             steps {
                 script {
                     failedStage = "Docker Build & Push"
+                }
+				dir('GenerateQR/GenerateQR_v3/GenerateQR/GenerateQR.Tests') {
                     bat """
                         docker build -t %DOCKER_IMAGE%:%IMAGE_TAG% .
                         docker tag %DOCKER_IMAGE%:%IMAGE_TAG% %DOCKER_IMAGE%:%BUILD_NUMBER%
@@ -70,7 +72,7 @@ pipeline {
                 body: """
                 <html>
                 <body>
-                <h2>Jenkins Pipeline Build Succeeded 🎉</h2>
+                <h2>Jenkins Pipeline Build Succeeded</h2>
                 <p><strong>Build:</strong> ${currentBuild.fullDisplayName}</p>
                 <p><strong>Branch:</strong> ${GITHUB_REPO}</p>
                 <p><a href="${env.BUILD_URL}">Click here</a> to view details.</p>
@@ -93,7 +95,7 @@ pipeline {
                     body: """
                     <html>
                     <body>
-                    <h2>Jenkins Pipeline Failure Notification 🚨</h2>
+                    <h2>Jenkins Pipeline Failure Notification</h2>
                     <p><strong>Build Status:</strong> ${buildStatus}</p>
                     <p><strong>Failed Stage:</strong> ${failedStage}</p>
                     <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
@@ -115,7 +117,7 @@ pipeline {
                 body: """
                 <html>
                 <body>
-                <h2>Jenkins Pipeline is Unstable ⚠️</h2>
+                <h2>Jenkins Pipeline is Unstable</h2>
                 <p>The build <strong>${currentBuild.fullDisplayName}</strong> completed with warnings.</p>
                 <p>Please check the results at <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>.</p>
                 </body></html>
