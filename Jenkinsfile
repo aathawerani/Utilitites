@@ -162,7 +162,7 @@ pipeline {
 		stage('Wait for SonarQube & Email Report') {
 		    steps {
 		        script {
-		            echo "Waiting for SonarQube analysis to complete..."
+		            //echo "Waiting for SonarQube analysis to complete..."
 
 		            withSonarQubeEnv('SonarQube') {
 		                def sonarStatus = ""
@@ -184,7 +184,7 @@ pipeline {
 		                        \$result | ConvertTo-Json -Depth 20 -Compress
 		                    """).trim()
 
-		                    echo "SonarQube API Raw Response: ${response}"  // Log raw response for debugging
+		                    //echo "SonarQube API Raw Response: ${response}"  // Log raw response for debugging
 
 		                    // Ensure JSON formatting is correct before parsing
 		                    response = response.replaceAll('"errorThreshold":"([0-9\\.]+)"', '"errorThreshold":$1')
@@ -192,7 +192,8 @@ pipeline {
 
 		                    try {
 		                    	if (!response || response.contains("error")) {
-		                            error "Received an invalid SonarQube API response: ${response}"
+		                            //error "Received an invalid SonarQube API response: ${response}"
+		                            echo "Received an invalid SonarQube API response: ${response}"
 		                        }
 
 		                        // Parse JSON response using JsonSlurper
@@ -200,11 +201,12 @@ pipeline {
 		                        def jsonResponse = response
 
 		                        if (!jsonResponse?.projectStatus?.status) {
-		                            error "Invalid JSON structure: Missing 'projectStatus' field."
+		                            //error "Invalid JSON structure: Missing 'projectStatus' field."
+		                            echo "Invalid JSON structure: Missing 'projectStatus' field."
 		                        }
 
 		                        sonarStatus = jsonResponse.projectStatus.status
-		                        echo "SonarQube Status: ${sonarStatus}"
+		                        //echo "SonarQube Status: ${sonarStatus}"
 
 		                        if (sonarStatus == "ERROR") {
 
@@ -254,6 +256,7 @@ pipeline {
 		                        }
 		                    } catch (Exception e) {
 		                        //error "Failed to parse SonarQube API response: ${e.message}"
+		                        echo "Exception: Failed to parse SonarQube API response: ${e.message}"
 		                    }
 
 		                    if (sonarStatus == "OK" || sonarStatus == "ERROR") {

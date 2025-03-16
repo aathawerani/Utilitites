@@ -48,18 +48,19 @@ pipeline {
             }
         }
         stage('Verify Deployment') {
-	    steps {
-	        script {
-	            // Wait for pods to be ready
-	            bat "wsl kubectl rollout status deployment/my-dotnet-app --timeout=60s"
+		    steps {
+		        script {
+		            // Wait for pods to be ready
+		            bat "wsl kubectl rollout status deployment/my-dotnet-app --timeout=60s"
 
-	            // Fetch the NodePort dynamically
-	            def nodePort = bat(script: "wsl kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
+		            // Fetch the NodePort dynamically
+		            def nodePort = bat(script: "wsl kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
 
-	            // Check if the service is accessible
-	            bat "wsl curl --fail http://localhost:${nodePort} || exit 1"
-	        }
-	    }
+		            // Check if the service is accessible
+		            bat "wsl curl --fail http://localhost:${nodePort} || exit 1"
+		        }
+		    }
+    	}
     }
     post {
         success {
@@ -79,7 +80,6 @@ pipeline {
                 attachLog: true
             )
         }
-
         failure {
             script {
                 echo "Jenkins Pipeline Failed! Sending email notification."
@@ -108,7 +108,6 @@ pipeline {
                 )
             }
         }
-
         unstable {
             emailext (
                 to: "${EMAIL_RECIPIENT}",
