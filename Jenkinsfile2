@@ -37,9 +37,7 @@ pipeline {
             steps {
                 script {
                     failedStage = "Load Docker Image into Kubernetes"
-                    bat '''
-                    powershell -Command "kind load docker-image ${DOCKER_IMAGE}:${IMAGE_TAG}"
-                    '''
+                    bat "wsl -u aaht14 kind load docker-image ${DOCKER_IMAGE}:${IMAGE_TAG}"
                 }
             }
         }
