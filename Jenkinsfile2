@@ -37,7 +37,7 @@ pipeline {
             steps {
                 script {
                     failedStage = "Load Docker Image into Kubernetes"
-                    bat "wsl -u aaht14 kind load docker-image ${DOCKER_IMAGE}:${IMAGE_TAG}"
+                    bat 'ssh -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image my-dotnet8-app:latest"'
                 }
             }
         }
