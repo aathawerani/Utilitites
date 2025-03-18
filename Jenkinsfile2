@@ -41,7 +41,6 @@ pipeline {
                     bat '''
                     ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image my-dotnet8-app:latest"
                     '''
-                    sh 'exit'
                 }
             }
         }
@@ -49,7 +48,7 @@ pipeline {
             steps {
                 script {
                     failedStage = "Deploy to Kubernetes using Ansible"
-                    bat "bat 'wsl ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml'"
+                    bat "'ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml'"
                 }
             }
         }
