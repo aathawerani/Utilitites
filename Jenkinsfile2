@@ -62,22 +62,22 @@ pipeline {
                     ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl rollout status deployment/my-dotnet-app --timeout=60s"
                     '''
 
-                    // Extract NodePort
+                    // Extract NodePort properly
                     def nodePort = bat(script: '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'"
-                    ''', returnStdout: true).trim()
-                    
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl get svc my-dotnet-app-service -o=jsonpath={.spec.ports[0].nodePort}"
+                    ''', returnStdout: true).trim().split("\r?\n")[-1].trim()
+
                     echo "Extracted NodePort: ${nodePort}"
 
-                    // Extract Node IP
+                    // Extract Node IP properly (Replacing awk with cut)
                     def nodeIp = bat(script: '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "hostname -I | awk '{print $1}'"
-                    ''', returnStdout: true).trim()
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "hostname -I | cut -d' ' -f1"
+                    ''', returnStdout: true).trim().split("\r?\n")[-1].trim()
 
                     echo "Extracted Node IP: ${nodeIp}"
 
-                    // Validate Service Accessibility
-                    bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost \"curl --fail http://${nodeIp}:${nodePort} || exit 1\""
+                    // Ensure proper interpolation and formatting for curl command
+                    bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost curl --fail http://${nodeIp}:${nodePort} || exit 1"
                 }
             }
         }
