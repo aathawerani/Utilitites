@@ -58,13 +58,18 @@ pipeline {
 		    steps {
 		        script {
 		            // Wait for pods to be ready
-		            bat "wsl kubectl rollout status deployment/my-dotnet-app --timeout=60s"
+                    bat '''
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl rollout status deployment/my-dotnet-app --timeout=60s"
+                    '''
 
-		            // Fetch the NodePort dynamically
-		            def nodePort = bat(script: "wsl kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
+                    def nodePort = bat(script:  '''
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'"
+                    ''', returnStdout: true).trim()
 
 		            // Check if the service is accessible
-		            bat "wsl curl --fail http://localhost:${nodePort} || exit 1"
+                    bat '''
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "curl --fail http://localhost:${nodePort} || exit 1"
+                    '''
 		        }
 		    }
     	}
