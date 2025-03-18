@@ -3,8 +3,7 @@
   connection: local
   tasks:
     - name: Ensure Kubernetes Collection is Installed
-      ansible.builtin.command:
-        cmd: ansible-galaxy collection list kubernetes.core
+      ansible.builtin.command: ansible-galaxy collection list kubernetes.core
       register: kube_collection
       changed_when: false
 
