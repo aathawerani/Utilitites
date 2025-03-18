@@ -50,10 +50,7 @@ pipeline {
                 script {
                     failedStage = "Deploy to Kubernetes using Ansible"
                     sh '''
-                    echo "Starting Ansible deployment..."
-                    ansible-playbook --version
-                    ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml
-                    echo "Ansible deployment completed!"
+                    wsl ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml"
                     '''
                 }
             }
