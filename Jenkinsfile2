@@ -39,13 +39,9 @@ pipeline {
                     failedStage = "Load Docker Image into Kubernetes"
                     bat 'whoami'
                     bat '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image my-dotnet8-app:latest; exit"
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image my-dotnet8-app:latest"
                     '''
-                    sh '''
-                    wsl ssh user@host <<EOF
-                    exit
-                    EOF
-                    '''
+                    sh 'exit'
                 }
             }
         }
