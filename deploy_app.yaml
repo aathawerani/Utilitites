@@ -1,20 +1,20 @@
 - name: Deploy Application to Kubernetes
   hosts: localhost
   connection: local
-  tasks:
-    - name: Ensure Kubernetes Collection is Installed
-      ansible.builtin.command: ansible-galaxy collection list kubernetes.core
-      register: kube_collection
-      changed_when: false
+  vars:
+    ansible_python_interpreter: /usr/bin/python3  # Ensure it uses the correct Python
 
+  tasks:
     - name: Apply Kubernetes Deployment
       kubernetes.core.k8s:
+        kubeconfig: "/home/aaht14/.kube/config"
         state: present
         src: k8s/deployment.yaml
       become: yes
 
     - name: Apply Kubernetes Service
       kubernetes.core.k8s:
+        kubeconfig: "/home/aaht14/.kube/config"
         state: present
         src: k8s/service.yaml
       become: yes
