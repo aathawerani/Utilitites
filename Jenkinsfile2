@@ -49,7 +49,7 @@ pipeline {
                 script {
                     failedStage = "Deploy to Kubernetes using Ansible"
                     bat '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml"
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yaml"
                     '''
                 }
             }
