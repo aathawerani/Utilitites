@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     failedStage = "Deploy to Kubernetes using Ansible"
-                    bat "bat 'wsl ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml'"
+                    sh 'wsl ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml'
                 }
             }
         }
