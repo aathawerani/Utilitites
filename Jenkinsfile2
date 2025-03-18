@@ -48,7 +48,9 @@ pipeline {
             steps {
                 script {
                     failedStage = "Deploy to Kubernetes using Ansible"
-                    bat "'wsl ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml'"
+                    bat '''
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "ansible-playbook -i /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/inventory.ini /mnt/d/DevOps/jenkins/.jenkins/workspace/DevSecOps3/deploy_app.yml"
+                    '''
                 }
             }
         }
