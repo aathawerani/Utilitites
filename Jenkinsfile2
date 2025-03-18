@@ -77,9 +77,7 @@ pipeline {
                     echo "Extracted Node IP: ${nodeIp}"
 
                     // Validate Service Accessibility
-                    bat '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "curl --fail http://${nodeIp}:${nodePort} || exit 1"
-                    '''
+                    bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost \"curl --fail http://${nodeIp}:${nodePort} || exit 1\""
                 }
             }
         }
