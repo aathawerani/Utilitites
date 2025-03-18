@@ -55,24 +55,34 @@ pipeline {
             }
         }
         stage('Verify Deployment') {
-		    steps {
-		        script {
-		            // Wait for pods to be ready
+            steps {
+                script {
+                    // Wait for pods to be ready
                     bat '''
                     ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl rollout status deployment/my-dotnet-app --timeout=60s"
                     '''
 
-                    def nodePort = bat(script:  '''
+                    // Extract NodePort
+                    def nodePort = bat(script: '''
                     ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl get svc my-dotnet-app-service -o=jsonpath='{.spec.ports[0].nodePort}'"
                     ''', returnStdout: true).trim()
+                    
+                    echo "Extracted NodePort: ${nodePort}"
 
-		            // Check if the service is accessible
+                    // Extract Node IP
+                    def nodeIp = bat(script: '''
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "hostname -I | awk '{print $1}'"
+                    ''', returnStdout: true).trim()
+
+                    echo "Extracted Node IP: ${nodeIp}"
+
+                    // Validate Service Accessibility
                     bat '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "curl --fail http://localhost:${nodePort} || exit 1"
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "curl --fail http://${nodeIp}:${nodePort} || exit 1"
                     '''
-		        }
-		    }
-    	}
+                }
+            }
+        }
     }
     post {
         success {
