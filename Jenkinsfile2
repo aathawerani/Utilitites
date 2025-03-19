@@ -61,21 +61,6 @@ pipeline {
                     bat '''
                     ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl rollout status deployment/my-dotnet-app --timeout=60s"
                     '''
-
-                    // Extract NodePort properly
-                    def nodePort = bat(script: '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kubectl get svc my-dotnet-app-service -o=jsonpath={.spec.ports[0].nodePort}"
-                    ''', returnStdout: true).trim().split("\r?\n")[-1].trim()
-
-                    echo "Extracted NodePort: ${nodePort}"
-
-                    // Extract Node IP properly (Replacing awk with cut)
-                    def nodeIp = bat(script: '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "hostname -I | cut -d' ' -f1"
-                    ''', returnStdout: true).trim().split("\r?\n")[-1].trim()
-
-                    echo "Extracted Node IP: ${nodeIp}"
-
                     // Ensure proper interpolation and formatting for curl command
                     bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost curl --fail http://localhost:32356 || exit 1"
                 }
@@ -88,10 +73,9 @@ pipeline {
                 }
                 bat '''
                 cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
-                start "ZAP" /B zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
-                timeout /t 30
-                "C:\\Python39\\Scripts\\zap-cli.exe" quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:8090
-                "C:\\Python39\\Scripts\\zap-cli.exe" report -o zap_report.html -f html
+                zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true 
+                zap-cli.exe quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:32356
+                zap-cli.exe report -o zap_report.html -f html
                 '''
             }
         }
