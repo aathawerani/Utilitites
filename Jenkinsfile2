@@ -77,7 +77,7 @@ pipeline {
                     echo "Extracted Node IP: ${nodeIp}"
 
                     // Ensure proper interpolation and formatting for curl command
-                    bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost curl --fail http://${nodeIp}:${nodePort} || exit 1"
+                    bat "ssh -i C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\.ssh\\\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost curl --fail http://localhost:32356 || exit 1"
                 }
             }
         }
@@ -87,9 +87,9 @@ pipeline {
                     failedStage = "OWASP ZAP Security Scan"
                 }
                 bat '''
-                D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap.sh -daemon -host 127.0.0.1 -port 32356 -config api.disablekey=true
-                D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:8080
-                D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-cli report -o zap_report.html -f html
+                "D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap.sh" -daemon -host 127.0.0.1 -port 32356 -config api.disablekey=true
+                "D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-cli" quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:32356
+                "D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-cli report" -o zap_report.html -f html
                 '''
             }
         }
