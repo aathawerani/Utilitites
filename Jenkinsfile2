@@ -73,14 +73,11 @@ pipeline {
                 }
                 bat '''
                 cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
+                
+                REM Start ZAP in daemon mode and listen on port 8090
+                start /B zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
 
-                REM Start ZAP in the background using PowerShell
-                powershell Start-Process -NoNewWindow -FilePath "zap.bat" -ArgumentList "-daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true"
-
-                REM Wait for ZAP to start fully
-                timeout /t 30
-
-                REM Run the scan on your target application
+                REM Scan the target application (Update the port to match your app)
                 java -jar zap-2.16.0.jar -cmd -quickurl "http://localhost:32356" -quickprogress -quickout zap_report.html
                 '''
             }
