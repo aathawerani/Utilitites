@@ -88,7 +88,7 @@ pipeline {
                 }
                 bat '''
                 cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
-                "zap.bat -daemon -host 127.0.0.1 -port 32356 -config api.disablekey=true
+                "zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
                 "zap-cli" quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:32356
                 "zap-cli report" -o zap_report.html -f html
                 '''
