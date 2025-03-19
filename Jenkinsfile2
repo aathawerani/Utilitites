@@ -73,9 +73,15 @@ pipeline {
                 }
                 bat '''
                 cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
-                start cmd /c zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true timeout /t 30 
-                zap-cli.exe quick-scan --self-contained --start-options "-config api.disablekey=true" http://localhost:32356
-                zap-cli.exe report -o zap_report.html -f html
+                
+                REM Start ZAP in daemon mode and listen on port 8090
+                start /B zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
+                
+                REM Wait for ZAP to fully start
+                timeout /t 30
+
+                REM Scan the target application (Update the port to match your app)
+                java -jar zap-2.16.0.jar -cmd -quickurl "http://localhost:32356" -quickprogress -quickout zap_report.html
                 '''
             }
         }
