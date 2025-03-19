@@ -73,7 +73,7 @@ pipeline {
                 }
                 bat '''
                 cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
-                
+
                 REM Set a unique home directory to prevent conflicts
                 set ZAP_HOMEDIR=D:\\DevOps\\ZAP\\Zed_Home
 
@@ -81,14 +81,27 @@ pipeline {
                 netstat -an | find "8090" > nul
                 if %ERRORLEVEL% neq 0 (
                     echo ZAP is not running, starting ZAP...
-                    start /B zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
+                    start "ZAP" /B zap.bat -daemon -host 127.0.0.1 -port 8090 -config api.disablekey=true
                 ) else (
                     echo ZAP is already running.
                 )
                 '''
 
                 script {
-                    sleep(10)  // Wait for ZAP to fully start
+                    echo "Waiting for ZAP to be ready..."
+                    def maxRetries = 10
+                    def zapRunning = false
+                    for (int i = 0; i < maxRetries; i++) {
+                        def result = bat(script: 'netstat -an | find "8090"', returnStatus: true)
+                        if (result == 0) {
+                            zapRunning = true
+                            break
+                        }
+                        sleep(5)
+                    }
+                    if (!zapRunning) {
+                        error("ZAP did not start properly.")
+                    }
                 }
 
                 bat '''
