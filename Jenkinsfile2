@@ -33,6 +33,16 @@ pipeline {
                 }
             }
         }
+        stage('Docker Security Scan') {
+            steps {
+                script {
+                    failedStage = "Docker Security Scan"
+                }
+                bat '''
+                "D:\\DevOps\\trivy\\trivy" image --no-progress --exit-code 1 --severity HIGH,CRITICAL %DOCKER_IMAGE%:%IMAGE_TAG%
+                '''
+            }
+        }
         stage('Load Docker Image into Kubernetes') {
             steps {
                 script {
