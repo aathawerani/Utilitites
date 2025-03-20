@@ -73,8 +73,7 @@ pipeline {
                 }
 
                 bat '''
-                cd /d "D:\\DevOps\\ZAP\\Zed Attack Proxy"
-                java -jar zap-2.16.0.jar -cmd -quickurl "http://localhost:32356" -quickprogress -quickout zap_report.html
+                java -jar D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-2.16.0.jar -cmd -quickurl "http://localhost:32356" -quickprogress -quickout zap_report.html
                 '''
             }
         }
