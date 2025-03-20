@@ -39,7 +39,7 @@ pipeline {
                     failedStage = "Docker Security Scan"
                 }
                 bat '''
-                "D:\\DevOps\\trivy\\trivy" image --no-progress --exit-code 0 --severity HIGH,CRITICAL --format template --template "@contrib/html.tpl" --output trivy-report.html %DOCKER_IMAGE%:%IMAGE_TAG%
+                "D:\\DevOps\\trivy\\trivy" image --no-progress --exit-code 0 --severity HIGH,CRITICAL --format template --template "D:\\DevOps\\trivy\\contrib\\html.tpl" --output trivy-report.html %DOCKER_IMAGE%:%IMAGE_TAG%
                 '''
             }
         }
