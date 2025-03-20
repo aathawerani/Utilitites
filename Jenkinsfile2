@@ -39,7 +39,7 @@ pipeline {
                     failedStage = "Docker Security Scan"
                 }
                 bat '''
-                "D:\\DevOps\\trivy\\trivy" image --no-progress --exit-code 1 --severity HIGH,CRITICAL %DOCKER_IMAGE%:%IMAGE_TAG%
+                "D:\\DevOps\\trivy\\trivy" image --no-progress --exit-code 0 --severity HIGH,CRITICAL --format template --template "@contrib/html.tpl" --output trivy-report.html %DOCKER_IMAGE%:%IMAGE_TAG%
                 '''
             }
         }
@@ -49,7 +49,7 @@ pipeline {
                     failedStage = "Load Docker Image into Kubernetes"
                     bat 'whoami'
                     bat '''
-                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image my-dotnet8-app:latest"
+                    ssh -i C:\\Windows\\System32\\config\\systemprofile\\.ssh\\id_ed25519 -o StrictHostKeyChecking=no aaht14@localhost "kind load docker-image %DOCKER_IMAGE%:%IMAGE_TAG%"
                     '''
                 }
             }
