@@ -73,6 +73,7 @@ pipeline {
                 }
 
                 bat '''
+                set ZAP_HOMEDIR="D:\\DevOps\\jenkins\\.jenkins\\workspace\\DevSecOps3\\ZAP\\Zed_Home"
                 java -jar "D:\\DevOps\\ZAP\\Zed Attack Proxy\\zap-2.16.0.jar" -cmd -quickurl "http://localhost:32356" -quickprogress -quickout zap_report.html
                 '''
             }
